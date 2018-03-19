@@ -33,6 +33,7 @@ The variants implemented here are based on multiple oracle calls (building a ser
 ## Installation
 
 Package is available on PyPI, can be installed with
+
 ```pip install costsensitive``` 
 
 ## Sample usage
@@ -87,7 +88,7 @@ All code is internally documented through docstrings (e.g. you can try `help(Wei
 
 In general, you would most likely be best served by using `WeightedAllPairs` with default arguments. The pairwise weighting technique from "Error limiting reductions between classification tasks" doesn't seem to improve expected cost in practice compared to simply defining weight as the difference in cost between two classes.
 
-All-Pairs however requires fitting $m*(m-1)/2$ classifiers, where `m` is the number of classes. If there are too many classes, this means fitting a very large number of classifiers, in which case you might want to consider `RegressionOneVsRest` - it works with a regressor rather than a classifier, as the name suggests.
+All-Pairs however requires fitting `m*(m-1)/2` classifiers, where `m` is the number of classes. If there are too many classes, this means fitting a very large number of classifiers, in which case you might want to consider `RegressionOneVsRest` - it works with a regressor rather than a classifier, as the name suggests.
 
 The `FilterTree` method from "Multiclass classification with filter trees" tends to work really bad in practice with linear classifiers such as logistic regression, as it implies mixing together classes, which can result in very hard classification problems. Only recommended for tree-based classifiers.
 

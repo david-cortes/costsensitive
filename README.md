@@ -81,7 +81,7 @@ For a more detailed example, see the IPython notebook [Cost-Sensitive Multi-Clas
 
 ## Documentation
 
-All code is internally documented through docstrings (e.g. you can try `help(WeightedAllPairs)`, `help(WeightedAllPairs.fit)`, help(WeightedAllPairs.predict)`, etc.).
+All code is internally documented through docstrings (e.g. you can try `help(WeightedAllPairs)`, `help(WeightedAllPairs.fit)`, `help(WeightedAllPairs.predict)`, etc.).
 
 ## Some comments
 

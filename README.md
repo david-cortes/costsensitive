@@ -92,7 +92,7 @@ All-Pairs however requires fitting `m*(m-1)/2` classifiers, where `m` is the num
 
 The `FilterTree` method from "Multiclass classification with filter trees" tends to work really bad in practice with linear classifiers such as logistic regression, as it implies mixing together classes, which can result in very hard classification problems. Only recommended for tree-based classifiers.
 
-#References 
+## References 
 
 * Beygelzimer, A., Dani, V., Hayes, T., Langford, J., & Zadrozny, B. (2005, August). Error limiting reductions between classification tasks. In Proceedings of the 22nd international conference on Machine learning (pp. 49-56). ACM. 
 * Beygelzimer, A., Langford, J., & Zadrozny, B. (2008). Machine learning techniques—reductions between prediction quality metrics. In Performance Modeling and Engineering (pp. 3-28). Springer US. 

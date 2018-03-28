@@ -356,7 +356,6 @@ class FilterTree:
                 w=np.abs(cost1-cost2)
 
                 valid_obs=w>0
-                vs1=deepcopy(valid_obs)
                 if child1>0:
                     valid_obs=valid_obs&(labels_take[:,child1]>=0)
                 if child2>0:
@@ -366,7 +365,7 @@ class FilterTree:
                 y_take=y[valid_obs]
                 w_take=w[valid_obs]
                 w_take=_standardize_weights(w_take)
-
+                
                 self.classifiers[c].fit(X_take,y_take,sample_weight=w_take)
                 
                 labels_arr=np.c_[class1,class2].astype('int64')

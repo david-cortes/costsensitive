@@ -1,0 +1,730 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>costsensitive package &mdash; Cost Sensitive 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Cost Sensitive 0.1 documentation" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Cost Sensitive
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">costsensitive package</a><ul>
+<li><a class="reference internal" href="#module-costsensitive">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Cost Sensitive</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>costsensitive package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/costsensitive.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="costsensitive-package">
+<h1>costsensitive package<a class="headerlink" href="#costsensitive-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-costsensitive">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-costsensitive" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="costsensitive.CostProportionateClassifier">
+<em class="property">class </em><code class="descclassname">costsensitive.</code><code class="descname">CostProportionateClassifier</code><span class="sig-paren">(</span><em>base_classifier</em>, <em>n_samples=10</em><span class="sig-paren">)</span><a class="headerlink" href="#costsensitive.CostProportionateClassifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="costsensitive.CostProportionateClassifier.decision_function">
+<code class="descname">decision_function</code><span class="sig-paren">(</span><em>X</em>, <em>aggregation='raw'</em><span class="sig-paren">)</span><a class="headerlink" href="#costsensitive.CostProportionateClassifier.decision_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate how preferred is positive class according to classifiers</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>If passing aggregation = ‘raw’, it will output the proportion of the classifiers
+that voted for the positive class.
+If passing aggregation = ‘weighted’, it will output the average predicted probability
+for the positive class for each classifier.</p>
+<p class="last">Calculating it with aggregation = ‘weighted’ requires the base classifier to have a
+‘predict_proba’ method.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>X</strong> (<em>array (n_samples, n_features):</em>) – Observations for which to determine class likelihood.</li>
+<li><strong>aggregation</strong> (<em>str, either ‘raw’ or ‘weighted’</em>) – How to compute the ‘goodness’ of the positive class (see Note)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>pred</strong> – Score for the positive class (see Note)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array (n_samples,)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="costsensitive.CostProportionateClassifier.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>sample_weight=None</em>, <em>extra_rej_const=0.1</em><span class="sig-paren">)</span><a class="headerlink" href="#costsensitive.CostProportionateClassifier.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit a binary classifier with sample weights to data.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Examples at each sample are accepted with probability = weight/Z,
+where Z = max(weight) + extra_rej_const.
+Larger values for extra_rej_const ensure that no example gets selected in
+every single sample, but results in smaller sample sizes as more examples are rejected.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>X</strong> (<em>array (n_samples, n_features)</em>) – Data on which to fit the model.</li>
+<li><strong>y</strong> (<em>array (n_samples,) or (n_samples, 1)</em>) – Class of each observation.</li>
+<li><strong>sample_weight</strong> (<em>array (n_samples,) or (n_samples, 1)</em>) – Weights indicating how important is each observation in the loss function.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="costsensitive.CostProportionateClassifier.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em>, <em>aggregation='raw'</em><span class="sig-paren">)</span><a class="headerlink" href="#costsensitive.CostProportionateClassifier.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict the class of an observation</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>If passing aggregation = ‘raw’, it will output the class that most classifiers outputted,
+breaking ties by predicting the positive class.
+If passing aggregation = ‘weighted’, it will weight each vote from a classifier according
+to the probabilities predicted.</p>
+<p class="last">Predicting with aggregation = ‘weighted’ requires the base classifier to have a
+‘predict_proba’ method.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>X</strong> (<em>array (n_samples, n_features):</em>) – Observations for which to predict their class.</li>
+<li><strong>aggregation</strong> (<em>str, either ‘raw’ or ‘weighted’</em>) – How to compute the ‘goodness’ of the positive class (see Note)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>pred</strong> – Predicted class for each observation.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array (n_samples,)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="costsensitive.FilterTree">
+<em class="property">class </em><code class="descclassname">costsensitive.</code><code class="descname">FilterTree</code><span class="sig-paren">(</span><em>base_classifier</em><span class="sig-paren">)</span><a class="headerlink" href="#costsensitive.FilterTree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="costsensitive.FilterTree.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>X</em>, <em>C</em><span class="sig-paren">)</span><a class="headerlink" href="#costsensitive.FilterTree.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit a filter tree classifier</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Shifting the order of the classes within the cost array will produce different
+results, as it will build a different binary tree comparing different classes
+at each node.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>X</strong> (<em>array (n_samples, n_features)</em>) – The data on which to fit a cost-sensitive classifier.</li>
+<li><strong>C</strong> (<em>array (n_samples, n_classes)</em>) – The cost of predicting each label for each observation (more means worse).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="costsensitive.FilterTree.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="headerlink" href="#costsensitive.FilterTree.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict the less costly class for a given observation</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The implementation here happens in a Python loop rather than in some
+NumPy array operations, thus it will be slower than the other algorithms
+here, even though in theory it implies fewer comparisons.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>X</strong> (<em>array (n_samples, n_features)</em>) – Data for which to predict minimum cost label.</li>
+<li><strong>method</strong> (<em>str, either ‘most-wins’ or ‘goodness’:</em>) – How to decide the best label (see Note)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>y_hat</strong> – Label with expected minimum cost for each observation.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array (n_samples,)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="costsensitive.RegressionOneVsRest">
+<em class="property">class </em><code class="descclassname">costsensitive.</code><code class="descname">RegressionOneVsRest</code><span class="sig-paren">(</span><em>base_regressor</em><span class="sig-paren">)</span><a class="headerlink" href="#costsensitive.RegressionOneVsRest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Regression One-Vs-Rest</p>
+<p>Fits one regressor trying to predict the cost of each class.
+Predictions are the class with the minimum predicted cost across regressors.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>base_regressor</strong> (<em>object</em>) –</p>
+<dl class="docutils">
+<dt>Regressor to be used for the sub-problems. Must have:</dt>
+<dd><ul class="first last simple">
+<li>A fit method of the form ‘base_classifier.fit(X, y)’.</li>
+<li>A predict method.</li>
+</ul>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>nclasses</strong> (<em>int</em>) – Number of classes on the data in which it was fit.</li>
+<li><strong>regressors</strong> (<em>list of objects</em>) – Regressor that predicts the cost of each class.</li>
+<li><strong>base_regressor</strong> (<em>object</em>) – Unfitted base regressor that was originally passed.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">References</p>
+<dl class="docutils">
+<dt>[1] Beygelzimer, A., Langford, J., &amp; Zadrozny, B. (2008).</dt>
+<dd>Machine learning techniques—reductions between prediction quality metrics.</dd>
+</dl>
+<dl class="method">
+<dt id="costsensitive.RegressionOneVsRest.decision_function">
+<code class="descname">decision_function</code><span class="sig-paren">(</span><em>X</em>, <em>apply_softmax=True</em><span class="sig-paren">)</span><a class="headerlink" href="#costsensitive.RegressionOneVsRest.decision_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get cost estimates for each observation</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>If called with apply_softmax = False, this will output the predicted
+COST rather than the ‘goodness’ - meaning, more is worse.</p>
+<p class="last">If called with apply_softmax = True, it will output one minus the softmax on the costs,
+producing a distribution over the choices summing up to 1 where more is better.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>X</strong> (<em>array (n_samples, n_features)</em>) – Data for which to predict the cost of each label.</li>
+<li><strong>apply_softmax</strong> (<em>bool</em>) – Whether to apply a softmax transform to the costs (see Note).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>pred</strong> – Either predicted cost or a distribution of ‘goodness’ over the choices,
+according to the apply_softmax argument.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array (n_samples, n_classes)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="costsensitive.RegressionOneVsRest.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>X</em>, <em>C</em><span class="sig-paren">)</span><a class="headerlink" href="#costsensitive.RegressionOneVsRest.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit one regressor per class</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>X</strong> (<em>array (n_samples, n_features)</em>) – The data on which to fit a cost-sensitive classifier.</li>
+<li><strong>C</strong> (<em>array (n_samples, n_classes)</em>) – The cost of predicting each label for each observation (more means worse).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="costsensitive.RegressionOneVsRest.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="headerlink" href="#costsensitive.RegressionOneVsRest.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict the less costly class for a given observation</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>X</strong> (<em>array (n_samples, n_features)</em>) – Data for which to predict minimum cost labels.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>y_hat</strong> – Label with expected minimum cost for each observation.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">array (n_samples,)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="costsensitive.WeightedAllPairs">
+<em class="property">class </em><code class="descclassname">costsensitive.</code><code class="descname">WeightedAllPairs</code><span class="sig-paren">(</span><em>base_classifier</em>, <em>weigh_by_cost_diff=True</em><span class="sig-paren">)</span><a class="headerlink" href="#costsensitive.WeightedAllPairs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="costsensitive.WeightedAllPairs.decision_function">
+<code class="descname">decision_function</code><span class="sig-paren">(</span><em>X</em>, <em>method='most-wins'</em><span class="sig-paren">)</span><a class="headerlink" href="#costsensitive.WeightedAllPairs.decision_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate a ‘goodness’ distribution over labels</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Predictions can be calculated either by counting which class wins the most
+pairwise comparisons (as in [1] and [2]), or - for classifiers with a ‘predict_proba’
+method - by taking into account also the margins of the prediction difference
+for one class over the other for each comparison.</p>
+<p>If passing method = ‘most-wins’, this ‘decision_function’ will output the proportion
+of comparisons that each class won. If passing method = ‘goodness’, it sums the
+outputs from ‘predict_proba’ from each pairwise comparison and divides it by the
+number of comparisons.</p>
+<p class="last">Using method = ‘goodness’ requires the base classifier to have a ‘predict_proba’ method.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>X</strong> (<em>array (n_samples, n_features)</em>) – Data for which to predict the cost of each label.</li>
+<li><strong>method</strong> (<em>str, either ‘most-wins’ or ‘goodness’:</em>) – How to decide the best label (see Note)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>pred</strong> – A goodness score (more is better) for each label and observation.
+If passing method=’most-wins’, it counts the proportion of comparisons
+that each class won.
+If passing method=’goodness’, it sums the outputs from ‘predict_proba’ from
+each pairwise comparison and divides it by the number of comparisons.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array (n_samples, n_classes)</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">References</p>
+<dl class="docutils">
+<dt>[1] Beygelzimer, A., Dani, V., Hayes, T., Langford, J., &amp; Zadrozny, B. (2005)</dt>
+<dd>Error limiting reductions between classification tasks.</dd>
+<dt>[2] Beygelzimer, A., Langford, J., &amp; Zadrozny, B. (2008).</dt>
+<dd>Machine learning techniques—reductions between prediction quality metrics.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="costsensitive.WeightedAllPairs.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>X</em>, <em>C</em><span class="sig-paren">)</span><a class="headerlink" href="#costsensitive.WeightedAllPairs.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit one classifier comparing each pair of classes</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>X</strong> (<em>array (n_samples, n_features)</em>) – The data on which to fit a cost-sensitive classifier.</li>
+<li><strong>C</strong> (<em>array (n_samples, n_classes)</em>) – The cost of predicting each label for each observation (more means worse).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="costsensitive.WeightedAllPairs.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em>, <em>method='most-wins'</em><span class="sig-paren">)</span><a class="headerlink" href="#costsensitive.WeightedAllPairs.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict the less costly class for a given observation</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Predictions can be calculated either by counting which class wins the most
+pairwise comparisons (as in [1] and [2]), or - for classifiers with a ‘predict_proba’
+method - by taking into account also the margins of the prediction difference
+for one class over the other for each comparison.</p>
+<p class="last">Using method = ‘goodness’ requires the base classifier to have a ‘predict_proba’ method.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>X</strong> (<em>array (n_samples, n_features)</em>) – Data for which to predict minimum cost label.</li>
+<li><strong>method</strong> (<em>str, either ‘most-wins’ or ‘goodness’:</em>) – How to decide the best label (see Note)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>y_hat</strong> – Label with expected minimum cost for each observation.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array (n_samples,)</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">References</p>
+<dl class="docutils">
+<dt>[1] Beygelzimer, A., Dani, V., Hayes, T., Langford, J., &amp; Zadrozny, B. (2005)</dt>
+<dd>Error limiting reductions between classification tasks.</dd>
+<dt>[2] Beygelzimer, A., Langford, J., &amp; Zadrozny, B. (2008).</dt>
+<dd>Machine learning techniques—reductions between prediction quality metrics.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="costsensitive.WeightedOneVsRest">
+<em class="property">class </em><code class="descclassname">costsensitive.</code><code class="descname">WeightedOneVsRest</code><span class="sig-paren">(</span><em>base_classifier</em>, <em>weight_simple_diff=False</em><span class="sig-paren">)</span><a class="headerlink" href="#costsensitive.WeightedOneVsRest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Weighted One-Vs-Rest Cost-Sensitive Classification</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>This will convert the problem into one sub-problem per class.</p>
+<p>If passing weight_simple_diff=True, the observations for each subproblem
+will be weighted according to the difference between the cost of the label being
+predicted and the minimum cost of any other label.</p>
+<p>If passing weight_simple_diff=False, they will be weighted according to the formula
+described in [1], originally meant for the All-Pairs variant.</p>
+<p class="last">The predictions are taken to be the maximum value of the decision functions of
+each One-Vs-Rest classifier. If the classifier has no method ‘decision_function’ or
+‘predict_proba’, it will output the class that whatever classifier considered correct,
+breaking ties by choosing the smallest index.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first">
+<li><p class="first"><strong>base_classifier</strong> (<em>object</em>) –</p>
+<dl class="docutils">
+<dt>Base binary classification algorithm. Must have:</dt>
+<dd><ul class="first last simple">
+<li>A fit method of the form ‘base_classifier.fit(X, y, sample_weights = w)’.</li>
+<li>A predict method.</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p class="first"><strong>weight_simple_diff</strong> (<em>bool</em>) – Whether to weight each sub-problem according to the absolute difference in
+costs between labels, or according to the formula described in [1] (See Note)</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>nclasses</strong> (<em>int</em>) – Number of classes on the data in which it was fit.</li>
+<li><strong>classifiers</strong> (<em>list of objects</em>) – Classifier that predicts each class.</li>
+<li><strong>weight_simple_diff</strong> (<em>bool</em>) – Whether each sub-problem was weighted according to the absolute difference in
+costs between labels, or according to the formula described in [1].</li>
+<li><strong>base_classifier</strong> (<em>object</em>) – Unfitted base regressor that was originally passed.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">References</p>
+<dl class="docutils">
+<dt>[1] Beygelzimer, A., Dani, V., Hayes, T., Langford, J., &amp; Zadrozny, B. (2005, August).</dt>
+<dd>Error limiting reductions between classification tasks.</dd>
+</dl>
+<dl class="method">
+<dt id="costsensitive.WeightedOneVsRest.decision_function">
+<code class="descname">decision_function</code><span class="sig-paren">(</span><em>X</em>, <em>apply_softmax=True</em><span class="sig-paren">)</span><a class="headerlink" href="#costsensitive.WeightedOneVsRest.decision_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate a ‘goodness’ distribution over labels</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>This will only work if the base classifiers has a ‘predict_proba’ method.
+It will output the predicted probabilities of each class being the less costly
+according to each classifier.</p>
+<p class="last">If passing apply_softmax = True, it will then apply a softmax transformation so
+that these scores sum up to 1 (per row).</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>X</strong> (<em>array (n_samples, n_features)</em>) – Data for which to predict the cost of each label.</li>
+<li><strong>apply_softmax</strong> (<em>bool</em>) – Whether to apply a softmax transform to the ‘goodness’ (see Note).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>pred</strong> – A goodness score (more is better) for each label and observation.
+If passing apply_softmax=True, these are standardized to sum up to 1 (per row).</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array (n_samples, n_classes)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="costsensitive.WeightedOneVsRest.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>X</em>, <em>C</em><span class="sig-paren">)</span><a class="headerlink" href="#costsensitive.WeightedOneVsRest.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit one weighted classifier per class</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>X</strong> (<em>array (n_samples, n_features)</em>) – The data on which to fit a cost-sensitive classifier.</li>
+<li><strong>C</strong> (<em>array (n_samples, n_classes)</em>) – The cost of predicting each label for each observation (more means worse).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="costsensitive.WeightedOneVsRest.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="headerlink" href="#costsensitive.WeightedOneVsRest.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict the less costly class for a given observation</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>X</strong> (<em>array (n_samples, n_features)</em>) – Data for which to predict minimum cost label.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>y_hat</strong> – Label with expected minimum cost for each observation.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">array (n_samples,)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, David Cortes.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

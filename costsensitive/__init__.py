@@ -3,48 +3,48 @@ from copy import deepcopy
 from scipy.stats import mode
 
 class WeightedAllPairs:
+    """
+    Weighted All-Pairs for Cost-Sensitive Classification
+    
+    Note
+    ----
+    This implementation also offers the option of weighting each observation
+    in a pairwise comparison according to the absolute difference in costs
+    between the two labels. Even though such a method might not enjoy theoretical
+    bounds on its regret or error, in practice, it can produce better results
+    than the weighting schema proposed in [1] and [2]
+    
+    Parameters
+    ----------
+    base_classifier : object
+        Base binary classification algorithm. Must have:
+            * A fit method of the form 'base_classifier.fit(X, y, sample_weights = w)'.
+            * A predict method.
+    weight_simple_diff : bool
+        Whether to weight each sub-problem according to the absolute difference in
+        costs between labels, or according to the formula described in [1] (See Note)
+    
+    Attributes
+    ----------
+    nclasses : int
+        Number of classes on the data in which it was fit.
+    classifiers : list of objects
+        Classifier that compares each two classes. Classes i and j out of n classes, with i<j,
+        are compared by the classifier at index i*(n-(i+1)/2)+j-i-1.
+    weight_simple_diff : bool
+        Whether each sub-problem was weighted according to the absolute difference in
+        costs between labels, or according to the formula described in [1]
+    base_classifier : object
+        Unfitted base regressor that was originally passed.
+        
+    References
+    ----------
+    [1] Beygelzimer, A., Dani, V., Hayes, T., Langford, J., & Zadrozny, B. (2005)
+        Error limiting reductions between classification tasks.
+    [2] Beygelzimer, A., Langford, J., & Zadrozny, B. (2008).
+        Machine learning techniques—reductions between prediction quality metrics.
+    """
     def __init__(self, base_classifier, weigh_by_cost_diff=True):
-        """
-        Weighted All-Pairs for Cost-Sensitive Classification
-        
-        Note
-        ----
-        This implementation also offers the option of weighting each observation
-        in a pairwise comparison according to the absolute difference in costs
-        between the two labels. Even though such a method might not enjoy theoretical
-        bounds on its regret or error, in practice, it can produce better results
-        than the weighting schema proposed in [1] and [2]
-        
-        Parameters
-        ----------
-        base_classifier : object
-            Base binary classification algorithm. Must have:
-                * A fit method of the form 'base_classifier.fit(X, y, sample_weights = w)'.
-                * A predict method.
-        weight_simple_diff : bool
-            Whether to weight each sub-problem according to the absolute difference in
-            costs between labels, or according to the formula described in [1] (See Note)
-        
-        Attributes
-        ----------
-        nclasses : int
-            Number of classes on the data in which it was fit.
-        classifiers : list of objects
-            Classifier that compares each two classes. Classes i and j out of n classes, with i<j,
-            are compared by the classifier at index i*(n-(i+1)/2)+j-i-1.
-        weight_simple_diff : bool
-            Whether each sub-problem was weighted according to the absolute difference in
-            costs between labels, or according to the formula described in [1]
-        base_classifier : object
-            Unfitted base regressor that was originally passed.
-            
-        References
-        ----------
-        [1] Beygelzimer, A., Dani, V., Hayes, T., Langford, J., & Zadrozny, B. (2005)
-            Error limiting reductions between classification tasks.
-        [2] Beygelzimer, A., Langford, J., & Zadrozny, B. (2008).
-            Machine learning techniques—reductions between prediction quality metrics.
-        """
         self.base_classifier=base_classifier
         self.weigh_by_cost_diff=weigh_by_cost_diff
     
@@ -273,36 +273,36 @@ class _BinTree:
         return None
 
 class FilterTree:
+    """
+    Filter-Tree for Cost-Sensitive Multi-Class classification
+    
+    Parameters
+    ----------
+    base_classifier : object
+        Base binary classification algorithm. Must have:
+            * A fit method of the form 'base_classifier.fit(X, y, sample_weights = w)'.
+            * A predict method.
+    
+    Attributes
+    ----------
+    nclasses : int
+        Number of classes on the data in which it was fit.
+    classifiers : list of objects
+        Classifier that compares each two classes belonging to a node.
+    tree : object
+        Binary tree with attributes childs and parents.
+        Non-negative numbers for children indicate non-terminal nodes,
+        while negative and zero indicates a class (terminal node).
+        Root is the node zero.
+    base_classifier : object
+        Unfitted base regressor that was originally passed.
+    
+    References
+    ----------
+    [1] Beygelzimer, A., Langford, J., & Ravikumar, P. (2007).
+        Multiclass classification with filter trees.
+    """
     def __init__(self, base_classifier):
-        """
-        Filter-Tree for Cost-Sensitive Multi-Class classification
-        
-        Parameters
-        ----------
-        base_classifier : object
-            Base binary classification algorithm. Must have:
-                * A fit method of the form 'base_classifier.fit(X, y, sample_weights = w)'.
-                * A predict method.
-        
-        Attributes
-        ----------
-        nclasses : int
-            Number of classes on the data in which it was fit.
-        classifiers : list of objects
-            Classifier that compares each two classes belonging to a node.
-        tree : object
-            Binary tree with attributes childs and parents.
-            Non-negative numbers for children indicate non-terminal nodes,
-            while negative and zero indicates a class (terminal node).
-            Root is the node zero.
-        base_classifier : object
-            Unfitted base regressor that was originally passed.
-        
-        References
-        ----------
-        [1] Beygelzimer, A., Langford, J., & Ravikumar, P. (2007).
-            Multiclass classification with filter trees.
-        """
         self.base_classifier=base_classifier
     
     def fit(self, X, C):
@@ -428,38 +428,38 @@ class FilterTree:
             return np.array(out)
 
 class CostProportionateClassifier:
+    """
+    Cost-Proportionate Rejection Sampling
+    
+    Turns a binary classifier with no native sample weighting method into a
+    binary classifier that supports sample weights.
+    
+    Parameters
+    ----------
+    base_classifier : object
+        Binary classifier used for predicting in each sample. Must have:
+            * A fit method of the form 'base_classifier.fit(X, y)'.
+            * A predict method.
+    n_samples : int
+        Number of samples taken. One classifier is fit per sample.
+    
+    Attributes
+    ----------
+    n_samples : int
+        Number of samples taken. One classifier is fit per sample.
+    classifiers : list of objects
+        Classifier that was fit to each sample.
+    base_classifier : object
+        Unfitted base classifier that was originally passed.
+    extra_rej_const : float
+        Extra rejection constant used for sampling (see 'fit' method).
+    
+    References
+    ----------
+    [1] Beygelzimer, A., Langford, J., & Zadrozny, B. (2008).
+        Machine learning techniques—reductions between prediction quality metrics.
+    """
     def __init__(self, base_classifier, n_samples=10):
-        """
-        Cost-Proportionate Rejection Sampling
-        
-        Turns a binary classifier with no native sample weighting method into a
-        binary classifier that supports sample weights.
-        
-        Parameters
-        ----------
-        base_classifier : object
-            Binary classifier used for predicting in each sample. Must have:
-                * A fit method of the form 'base_classifier.fit(X, y)'.
-                * A predict method.
-        n_samples : int
-            Number of samples taken. One classifier is fit per sample.
-        
-        Attributes
-        ----------
-        n_samples : int
-            Number of samples taken. One classifier is fit per sample.
-        classifiers : list of objects
-            Classifier that was fit to each sample.
-        base_classifier : object
-            Unfitted base classifier that was originally passed.
-        extra_rej_const : float
-            Extra rejection constant used for sampling (see 'fit' method).
-        
-        References
-        ----------
-        [1] Beygelzimer, A., Langford, J., & Zadrozny, B. (2008).
-            Machine learning techniques—reductions between prediction quality metrics.
-        """
         self.base_classifier=base_classifier
         self.n_samples=n_samples
     

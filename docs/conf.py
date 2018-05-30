@@ -87,7 +87,7 @@ todo_include_todos = False
 # a list of builtin themes.
 #
 # on_rtd is whether we are on readthedocs.org
-html_theme = 'alabaster'
+# html_theme = 'alabaster'
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
 if not on_rtd:  # only import and set the theme if we're building docs locally

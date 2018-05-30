@@ -3,8 +3,24 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Cost Sensitive's documentation!
-==========================================
+CostSensitive
+=============
+
+This is the documentation page for the python package *costsensitive*. For 
+more details, see the project's GitHub page:
+
+`<https://www.github.com/david-cortes/costsensitive/>`_
+
+Installation
+============
+Package is available on PyPI, can be installed with
+::
+
+    pip install costsensitive
+
+
+Documentation
+=============
 
 .. toctree::
 	:maxdepth: 2

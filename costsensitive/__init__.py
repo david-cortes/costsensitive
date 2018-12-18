@@ -133,7 +133,7 @@ class WeightedAllPairs:
         elif method=='goodness':
             return self._decision_function_goodness(X)
         else:
-            raise ValueError("method must be one of 'most-wins' or 'largest-goodness'.")
+            raise ValueError("method must be one of 'most-wins' or 'goodness'.")
     
     def predict(self, X, method='most-wins'):
         """

@@ -459,11 +459,12 @@ class CostProportionateClassifier:
     [1] Beygelzimer, A., Langford, J., & Zadrozny, B. (2008).
         Machine learning techniques—reductions between prediction quality metrics.
     """
-    def __init__(self, base_classifier, n_samples=10):
-        self.base_classifier=base_classifier
-        self.n_samples=n_samples
+    def __init__(self, base_classifier, n_samples=10, extra_rej_const=1e-1):
+        self.base_classifier = base_classifier
+        self.n_samples = n_samples
+        self.extra_rej_const = extra_rej_const
     
-    def fit(self, X, y, sample_weight=None, extra_rej_const=1e-1):
+    def fit(self, X, y, sample_weight=None):
         """
         Fit a binary classifier with sample weights to data.
         
@@ -483,19 +484,23 @@ class CostProportionateClassifier:
         sample_weight : array (n_samples,) or (n_samples, 1)
             Weights indicating how important is each observation in the loss function.
         """
-        self.extra_rej_const=extra_rej_const
+        assert self.extra_rej_const >= 0
         if sample_weight is None:
-            sample_weight=np.ones(y.shape[0])
-        assert sample_weight.min()>0
-        sample_weight=_standardize_weights(sample_weight)
-        Z=sample_weight.max()+extra_rej_const
-        sample_weight=sample_weight/Z
-        self.classifiers=[deepcopy(self.base_classifier) for c in range(self.n_samples)]
+            sample_weight = np.ones(y.shape[0])
+        else:
+            if isinstance(sample_weight, list):
+                sample_weight = np.array(sample_weight)
+            if len(sample_weight.shape):
+                sample_weight = sample_weight.reshape(-1)
+        assert sample_weight.shape[0] == X.shape[0]
+        assert sample_weight.min() > 0
+        
+        Z = sample_weight.max() + self.extra_rej_const
+        sample_weight[:] = sample_weight / Z # sample weight is now acceptance prob
+        self.classifiers = [deepcopy(self.base_classifier) for c in range(self.n_samples)]
         for c in range(self.n_samples):
-            take=np.random.random(size=X.shape[0])<=Z
-            X_take=X[take,:]
-            y_take=y[take]
-            self.classifiers[c].fit(X_take, y_take)
+            take = np.random.random(size = X.shape[0]) <= sample_weight
+            self.classifiers[c].fit(X[take, :], y[take])
         return self
     
     def decision_function(self, X, aggregation='raw'):

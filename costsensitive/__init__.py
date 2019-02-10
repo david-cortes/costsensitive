@@ -2,7 +2,10 @@ import numpy as np, warnings, multiprocessing
 from copy import deepcopy
 from scipy.stats import mode
 from joblib import Parallel, delayed
-from .vwrapper import c_calc_v
+try:
+    from .vwrapper import c_calc_v
+except:
+    pass
 
 #### Helper functions
 def _check_2d_inp(X, reshape = False):

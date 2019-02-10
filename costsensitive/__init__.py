@@ -1,6 +1,45 @@
-import numpy as np, pandas as pd
+import numpy as np, warnings, multiprocessing
 from copy import deepcopy
 from scipy.stats import mode
+from joblib import Parallel, delayed
+from .vwrapper import c_calc_v
+
+#### Helper functions
+def _check_2d_inp(X, reshape = False):
+    if X.__class__.__name__ == "DataFrame":
+        X = X.values
+    elif type(X) == np.matrixlib.defmatrix.matrix:
+        warnings.warn("Default matrix will be cast to array.")
+        X = np.array(X)
+    if type(X) != np.ndarray:
+        raise ValueError("'X' must be a numpy array or pandas data frame.")
+
+    if reshape:
+        if len(X.shape) == 1:
+            X = X.reshape((-1, 1))
+    return X
+
+def _check_fit_input(X, C):
+    X = _check_2d_inp(X, reshape = True)
+    C = _check_2d_inp(C, reshape = False)
+    assert X.shape[0] == C.shape[0]
+    assert C.shape[1] > 2
+    
+    return X, C
+
+def _standardize_weights(w):
+    return w * w.shape[0] / w.sum()
+
+def _check_njobs(njobs):
+    if njobs < 1:
+        njobs = multiprocessing.cpu_count()
+    if njobs is None:
+        return 1
+    assert isinstance(njobs, int)
+    assert njobs >= 1
+    return njobs
+
+
 
 class WeightedAllPairs:
     """
@@ -23,6 +62,10 @@ class WeightedAllPairs:
     weight_simple_diff : bool
         Whether to weight each sub-problem according to the absolute difference in
         costs between labels, or according to the formula described in [1] (See Note)
+    njobs : int
+        Number of parallel jobs to run. If it's a negative number, will take the maximum available
+        number of CPU cores. Note that making predictions with multiple jobs will require a **lot** more
+        memory. Can also be set after the object has already been initialized.
     
     Attributes
     ----------
@@ -42,11 +85,12 @@ class WeightedAllPairs:
     [1] Beygelzimer, A., Dani, V., Hayes, T., Langford, J., & Zadrozny, B. (2005)
         Error limiting reductions between classification tasks.
     [2] Beygelzimer, A., Langford, J., & Zadrozny, B. (2008).
-        Machine learning techniques—reductions between prediction quality metrics.
+        Machine learning techniques-reductions between prediction quality metrics.
     """
-    def __init__(self, base_classifier, weigh_by_cost_diff=True):
-        self.base_classifier=base_classifier
-        self.weigh_by_cost_diff=weigh_by_cost_diff
+    def __init__(self, base_classifier, weigh_by_cost_diff = True, njobs = -1):
+        self.base_classifier = base_classifier
+        self.weigh_by_cost_diff = weigh_by_cost_diff
+        self.njobs = _check_njobs(njobs)
     
     def fit(self, X, C):
         """
@@ -59,30 +103,32 @@ class WeightedAllPairs:
         C : array (n_samples, n_classes)
             The cost of predicting each label for each observation (more means worse).
         """
-        X,C = _check_fit_input(X,C)
-        self.nclasses=C.shape[1]
-        ncombs=int(self.nclasses*(self.nclasses-1)/2)
-        self.classifiers=[deepcopy(self.base_classifier) for c in range(ncombs)]
-        self.classes_compared=[None for i in range(ncombs)]
+        X, C = _check_fit_input(X, C)
+        self.nclasses = C.shape[1]
+        ncombs = int( self.nclasses * (self.nclasses - 1) / 2 )
+        self.classifiers = [ deepcopy(self.base_classifier) for c in range(ncombs) ]
+        self.classes_compared = [None for i in range(ncombs)]
         if self.weigh_by_cost_diff:
-            V=C
+            V = C
         else:
-            V=self._calculate_v(C)
-        
-        for i in range(self.nclasses-1):
-            for j in range(i+1,self.nclasses):
-                y=(V[:,i]<V[:,j]).astype('uint8')
-                w=np.abs(V[:,i]-V[:,j])
-                valid_cases=w>0
-                X_take=X[valid_cases,:]
-                y_take=y[valid_cases]
-                w_take=w[valid_cases]
-                w_take=_standardize_weights(w_take)
-                ix=self._get_comb_index(i,j)
-                self.classes_compared[ix]=(j,i)
-                self.classifiers[ix].fit(X_take, y_take, sample_weight=w_take)
-        self.classes_compared=np.array(self.classes_compared)
+            V = self._calculate_v(C)
+
+        Parallel(n_jobs=self.njobs, verbose=0, require="sharedmem")\
+            (  delayed(self._fit)(i, j, V, X) for i in range(self.nclasses - 1) for j in range(i + 1, self.nclasses) )
+        self.classes_compared = np.array(self.classes_compared)
         return self
+
+    def _fit(self, i, j, V, X):
+        y = (V[:, i] < V[:, j]).astype('uint8')
+        w = np.abs(V[:, i] - V[:, j])
+        valid_cases = w > 0
+        X_take = X[valid_cases, :]
+        y_take = y[valid_cases]
+        w_take = w[valid_cases]
+        w_take = _standardize_weights(w_take)
+        ix = self._get_comb_index(i, j)
+        self.classes_compared[ix] = (j, i)
+        self.classifiers[ix].fit(X_take, y_take, sample_weight=w_take)
         
     def decision_function(self, X, method='most-wins'):
         """
@@ -123,19 +169,17 @@ class WeightedAllPairs:
         [1] Beygelzimer, A., Dani, V., Hayes, T., Langford, J., & Zadrozny, B. (2005)
             Error limiting reductions between classification tasks.
         [2] Beygelzimer, A., Langford, J., & Zadrozny, B. (2008).
-            Machine learning techniques—reductions between prediction quality metrics.
+            Machine learning techniques-reductions between prediction quality metrics.
         """
-        X=_check_predict_input(X)
-        if len(X.shape)==1:
-            X=X.reshape(1,-1)
-        if method=='most-wins':
+        X = _check_2d_inp(X, reshape = True)
+        if method == 'most-wins':
             return self._decision_function_winners(X)
-        elif method=='goodness':
+        elif method == 'goodness':
             return self._decision_function_goodness(X)
         else:
             raise ValueError("method must be one of 'most-wins' or 'goodness'.")
     
-    def predict(self, X, method='most-wins'):
+    def predict(self, X, method = 'most-wins'):
         """
         Predict the less costly class for a given observation
         
@@ -165,63 +209,90 @@ class WeightedAllPairs:
         [1] Beygelzimer, A., Dani, V., Hayes, T., Langford, J., & Zadrozny, B. (2005)
             Error limiting reductions between classification tasks.
         [2] Beygelzimer, A., Langford, J., & Zadrozny, B. (2008).
-            Machine learning techniques—reductions between prediction quality metrics.
+            Machine learning techniques-reductions between prediction quality metrics.
         """
-        X=_check_predict_input(X)
-        if len(X.shape)==1:
-            X=X.reshape(1,-1)
-        if method=='most-wins':
-            winners=[self.classes_compared[np.repeat(c,X.shape[0]),self.classifiers[c].predict(X).astype('uint8')]\
-                         for c in range(len(self.classifiers))]
-            winners=np.vstack(winners)
-            winners = mode(winners, axis=0)[0].reshape(-1)
-            if winners.shape[0]==1:
-                return winners[0]
-            else:
-                return winners
-        elif method=='goodness':
-            goodness=self._decision_function_goodness(X)
-            if (len(goodness.shape)==1) or (goodness.shape[0]==1):
+        X = _check_2d_inp(X, reshape = True)
+        if method == 'most-wins':
+            return self._predict_winners(X)
+        elif method == 'goodness':
+            goodness = self._decision_function_goodness(X)
+            if (len(goodness.shape) == 1) or (goodness.shape[0] == 1):
                 return np.argmax(goodness)
             else:
                 return np.argmax(goodness, axis=1)
         else:
-            raise ValueError("method must be one of 'most-wins' or 'largest-goodness'.")
+            raise ValueError("method must be one of 'most-wins' or 'goodness'.")
             
-    def _decision_function_winners(self, X):
-        winners=np.zeros((X.shape[0], self.nclasses))
-        for c in range(len(self.classifiers)):
-            round_comp=self.classes_compared[np.repeat(c,X.shape[0]),self.classifiers[c].predict(X).astype('uint8')]
-            winners[np.arange(X.shape[0]), round_comp]+=1
-        winners=winners/len(self.classifiers)
-        return winners
+    def _predict_winners(self, X):
+        winners = np.empty((X.shape[0], len(self.classifiers)), dtype = "int64")
+        Parallel(n_jobs=self.njobs, verbose=0, require="sharedmem")(delayed(self._predict_winners_single)(c, winners, X) for c in range(len(self.classifiers)))
+        winners = mode(winners, axis=1)[0].reshape(-1).astype("int64")
+        if winners.shape[0] == 1:
+            return winners[0]
+        else:
+            return winners
+
+    def _predict_winners_single(self, c, winners, X):
+        winners[:, c] = self.classes_compared[np.repeat(c, X.shape[0]), self.classifiers[c].predict(X).reshape(-1)]
     
     def _decision_function_goodness(self, X):
         if 'predict_proba' not in dir(self.classifiers[0]):
             raise Exception("'goodness' method requires a classifier with 'predict_proba' method.")
-        goodness=np.zeros((X.shape[0],self.nclasses))
-        for c in range(len(self.classifiers)):
-            comp=comp=self.classifiers[c].predict_proba(X)
-            goodness[:,int(self.classes_compared[c,0])]+=comp[:,0]
-            goodness[:,int(self.classes_compared[c,1])]+=comp[:,1]
-        return goodness/len(self.classifiers)
+        
+        if self.njobs > 1:
+            goodness = np.zeros((len(self.classifiers), X.shape[0], self.nclasses))
+            Parallel(n_jobs=self.njobs, verbose=0, require="sharedmem")(delayed(self._decision_function_goodness_single)(c, goodness, X) for c in range(len(self.classifiers)))
+            return goodness.mean(axis = 0)
+        else:
+            goodness = np.zeros((X.shape[0], self.nclasses))
+            for c in range(len(self.classifiers)):
+                comp = self.classifiers[c].predict_proba(X)
+                goodness[:, int(self.classes_compared[c, 0])] += comp[:, 0]
+                goodness[:, int(self.classes_compared[c, 1])] += comp[:, 1]
+            return goodness / len(self.classifiers)
+
+    def _decision_function_goodness_single(self, c, goodness, X):
+        comp = self.classifiers[c].predict_proba(X)
+        goodness[c, :, int(self.classes_compared[c, 0])] += comp[:, 0]
+        goodness[c, :, int(self.classes_compared[c, 1])] += comp[:, 1]
+
+    def _decision_function_winners(self, X):
+        if self.njobs > 1:
+            winners = np.zeros((len(self.classifiers), X.shape[0], self.nclasses))
+            Parallel(n_jobs=self.njobs, verbose=0, require="sharedmem")(delayed(self._decision_function_winners_single)(c, winners, X) for c in range(len(self.classifiers)))
+            return winners.mean(axis = 0)
+        else:
+            winners = np.zeros((X.shape[0], self.nclasses))
+            for c in range(len(self.classifiers)):
+                round_comp = self.classes_compared[np.repeat(c, X.shape[0]), self.classifiers[c].predict(X).reshape(-1).astype("int64")]
+                winners[np.arange(X.shape[0]), round_comp] += 1
+            return winners / len(self.classifiers)
+
+    def _decision_function_winners_single(self, c, winners, X):
+        round_comp = self.classes_compared[np.repeat(c, X.shape[0]), self.classifiers[c].predict(X).reshape(-1).astype("int64")]
+        winners[c][np.arange(X.shape[0]), round_comp] += 1
+
+    def _calculate_v(self, C):
+        try:
+            return c_calc_v(C.astype("float64"), self.njobs)
+        except:
+            V = np.empty((C.shape[0], C.shape[1]), dtype = "float64")
+            Parallel(n_jobs=self.njobs, verbose=0, require="sharedmem")(delayed(WeightedAllPairs._calculate_v_single)(None, row, V, C) for row in range(C.shape[0]))
+            return V
+
+    def _calculate_v_single(self, row, V, C):
+        cost = C[row].copy()
+        out_order = np.argsort(cost)
+        cost = cost[out_order] - cost.min()
+        n = cost.shape[0]
+        v = np.zeros(n)
+        rectangle_width = np.diff(cost)
+        rectangle_height = 1 / (  np.arange(n - 1) + 1  )
+        v[1: ] = rectangle_width * rectangle_height
+        V[row] = np.cumsum(v)[ np.argsort(out_order) ]
     
-    def _calculate_v(self,C):
-        V=list()
-        for cost_vector in C:
-            cost=cost_vector.copy()
-            out_order=np.argsort(cost)
-            cost=cost[out_order]-cost.min()
-            n=cost.shape[0]
-            v=np.zeros(n)
-            rectangle_width=np.diff(cost)
-            rectangle_height=1/(np.arange(n-1)+1)
-            v[1:]=rectangle_width*rectangle_height
-            V.append(np.cumsum(v)[np.argsort(out_order)])
-        return np.vstack(V)
-    
-    def _get_comb_index(self,i,j):
-        return int(i*(self.nclasses-(i+1)/2)+j-i-1)
+    def _get_comb_index(self, i, j):
+        return int(  i * (self.nclasses -  (i + 1) / 2) + j - i - 1  )
 
 class _BinTree:
     # constructs a balanced binary tree
@@ -282,6 +353,9 @@ class FilterTree:
         Base binary classification algorithm. Must have:
             * A fit method of the form 'base_classifier.fit(X, y, sample_weights = w)'.
             * A predict method.
+    njobs : int
+        Number of parallel jobs to run. If it's a negative number, will take the maximum available
+        number of CPU cores. Parallelization is only for predictions, not for training.
     
     Attributes
     ----------
@@ -302,8 +376,9 @@ class FilterTree:
     [1] Beygelzimer, A., Langford, J., & Ravikumar, P. (2007).
         Multiclass classification with filter trees.
     """
-    def __init__(self, base_classifier):
-        self.base_classifier=base_classifier
+    def __init__(self, base_classifier, njobs = -1):
+        self.base_classifier = base_classifier
+        self.njobs = _check_njobs(njobs)
     
     def fit(self, X, C):
         """
@@ -341,13 +416,13 @@ class FilterTree:
                     continue
                     
                 if child1<=0:
-                    class1=-np.repeat(child1,X.shape[0]).astype('int64')
+                    class1=-np.repeat(child1,X.shape[0]).astype("int64")
                 else:
-                    class1=labels_take[:, child1].astype('int64')
+                    class1=labels_take[:, child1].astype("int64")
                 if child2<=0:
-                    class2=-np.repeat(child2,X.shape[0]).astype('int64')
+                    class2=-np.repeat(child2,X.shape[0]).astype("int64")
                 else:
-                    class2=labels_take[:, child2].astype('int64')
+                    class2=labels_take[:, child2].astype("int64")
 
 
                 cost1=C[np.arange(X.shape[0]),np.clip(class1,a_min=0,a_max=None)]
@@ -368,7 +443,7 @@ class FilterTree:
                 
                 self.classifiers[c].fit(X_take,y_take,sample_weight=w_take)
                 
-                labels_arr=np.c_[class1,class2].astype('int64')
+                labels_arr=np.c_[class1,class2].astype("int64")
                 labels_take[valid_obs,c]=labels_arr[np.repeat(0,X_take.shape[0]),\
                                                     self.classifiers[c].predict(X_take).reshape(-1).astype('uint8')]
                 already_fitted.add(c)
@@ -380,19 +455,6 @@ class FilterTree:
             if (len(classifier_queue)==0):
                 break
         return self
-    
-    def _predict(self, X):
-        curr_node=0
-        while True:
-            go_right=self.classifiers[curr_node].predict(X)
-            if go_right:
-                curr_node=self.tree.childs[curr_node][0]
-            else:
-                curr_node=self.tree.childs[curr_node][1]
-                
-            if curr_node<=0:
-                return -curr_node
-
             
     def predict(self, X):
         """
@@ -416,16 +478,29 @@ class FilterTree:
         y_hat : array (n_samples,)
             Label with expected minimum cost for each observation.
         """
-        X=_check_predict_input(X)
-        if len(X.shape)==1:
-            return self._predict(X.reshape(1, -1))
-        elif X.shape[0]==1:
+        X = _check_2d_inp(X, reshape = True)
+        if X.shape[0] == 1:
             return self._predict(X)
         else:
-            out=list()
-            for i in range(X.shape[0]):
-                out.append(self._predict(X[i,:].reshape(1, -1)))
-            return np.array(out)
+            shape_single = list(X.shape)
+            shape_single[0] = 1
+            pred = np.empty(X.shape[0], dtype = "int64")
+            Parallel(n_jobs=self.njobs, verbose=0, require="sharedmem")(delayed(self._predict)(row, pred, shape_single, X) for row in range(X.shape[0]))
+            return pred
+
+    def _predict(self, row, pred, shape_single, X):
+        curr_node = 0
+        X_single = X[row].reshape(shape_single)
+        while True:
+            go_right = self.classifiers[curr_node].predict(X_single)
+            if go_right:
+                curr_node = self.tree.childs[curr_node][0]
+            else:
+                curr_node = self.tree.childs[curr_node][1]
+                
+            if curr_node <= 0:
+                pred[row] = -curr_node
+                return None
 
 class CostProportionateClassifier:
     """
@@ -442,6 +517,9 @@ class CostProportionateClassifier:
             * A predict method.
     n_samples : int
         Number of samples taken. One classifier is fit per sample.
+    njobs : int
+        Number of parallel jobs to run. If it's a negative number, will take the maximum available
+        number of CPU cores.
     
     Attributes
     ----------
@@ -457,12 +535,13 @@ class CostProportionateClassifier:
     References
     ----------
     [1] Beygelzimer, A., Langford, J., & Zadrozny, B. (2008).
-        Machine learning techniques—reductions between prediction quality metrics.
+        Machine learning techniques-reductions between prediction quality metrics.
     """
-    def __init__(self, base_classifier, n_samples=10, extra_rej_const=1e-1):
+    def __init__(self, base_classifier, n_samples=10, extra_rej_const=1e-1, njobs = -1):
         self.base_classifier = base_classifier
         self.n_samples = n_samples
         self.extra_rej_const = extra_rej_const
+        self.njobs = _check_njobs(njobs)
     
     def fit(self, X, y, sample_weight=None):
         """
@@ -496,14 +575,18 @@ class CostProportionateClassifier:
         assert sample_weight.min() > 0
         
         Z = sample_weight.max() + self.extra_rej_const
-        sample_weight[:] = sample_weight / Z # sample weight is now acceptance prob
+        sample_weight = sample_weight / Z # sample weight is now acceptance prob
         self.classifiers = [deepcopy(self.base_classifier) for c in range(self.n_samples)]
-        for c in range(self.n_samples):
-            take = np.random.random(size = X.shape[0]) <= sample_weight
-            self.classifiers[c].fit(X[take, :], y[take])
+        ### Note: don't parallelize random number generation, as it's not always thread-safe
+        take_all = np.random.random(size = (self.n_samples, X.shape[0]))
+        Parallel(n_jobs=self.njobs, verbose=0, require="sharedmem")(delayed(self._fit)(c, take_all, X, y, sample_weight) for c in range(self.n_samples))
         return self
+
+    def _fit(self, c, take_all, X, y, sample_weight):
+        take = take_all[c] <= sample_weight
+        self.classifiers[c].fit(X[take, :], y[take])
     
-    def decision_function(self, X, aggregation='raw'):
+    def decision_function(self, X, aggregation = 'raw'):
         """
         Calculate how preferred is positive class according to classifiers
         
@@ -529,20 +612,26 @@ class CostProportionateClassifier:
         pred : array (n_samples,)
             Score for the positive class (see Note)
         """
-        if aggregation=='weighted':
+        if aggregation == 'weighted':
             if 'predict_proba' not in dir(self.classifiers[0]):
                 raise Exception("'aggregation='weighted'' is only available for classifiers with 'predict_proba' method.")
-        preds=list()
-        for c in self.classifiers:
-            if aggregation=='raw':
-                preds.append(c.predict(X).reshape(-1))
-            elif aggregation=='weighted':
-                preds.append(c.predict_proba(X)[:,1].reshape(-1))
-            else:
-                raise ValueError("'aggregation' must be one of 'raw' or 'weighted'.")
-        return np.vstack(preds).mean(axis=0)
+
+        preds = np.empty((X.shape[0], self.n_samples), dtype = "float64")
+        if aggregation == "raw":
+            Parallel(n_jobs=self.njobs, verbose=0, require="sharedmem")(delayed(self._decision_function_raw)(c, preds, X) for c in range(self.nsamples))
+        elif aggregation == "weighted":
+            Parallel(n_jobs=self.njobs, verbose=0, require="sharedmem")(delayed(self._decision_function_weighted)(c, preds, X) for c in range(self.nsamples))
+        else:
+            raise ValueError("'aggregation' must be one of 'raw' or 'weighted'.")
+        return preds.mean(axis = 1).reshape(-1)
+
+    def _decision_function_raw(self, c, preds, X):
+        preds[c, :] = self.classifiers[c].predict(X).reshape(-1)
+
+    def _decision_function_weighted(self, c, preds, X):
+        preds[c, :] = self.classifiers[c].predict_proba(X)[:, 1].reshape(-1)
     
-    def predict(self, X, aggregation='raw'):
+    def predict(self, X, aggregation = 'raw'):
         """
         Predict the class of an observation
         
@@ -568,7 +657,7 @@ class CostProportionateClassifier:
         pred : array (n_samples,)
             Predicted class for each observation.
         """
-        return (self.decision_function(X,aggregation)>=.5).astype('int64')
+        return (  self.decision_function(X,aggregation) >= .5  ).astype("int64")
 
 class WeightedOneVsRest:
     """
@@ -594,11 +683,14 @@ class WeightedOneVsRest:
     ----------
     base_classifier : object
         Base binary classification algorithm. Must have:
-            * A fit method of the form 'base_classifier.fit(X, y, sample_weights = w)'.
+            * A fit method of the form 'base_classifier.fit(X, y, sample_weight = w)'.
             * A predict method.
     weight_simple_diff : bool
         Whether to weight each sub-problem according to the absolute difference in
         costs between labels, or according to the formula described in [1] (See Note)
+    njobs : int
+        Number of parallel jobs to run. If it's a negative number, will take the maximum available
+        number of CPU cores.
     
     Attributes
     ----------
@@ -617,9 +709,10 @@ class WeightedOneVsRest:
     [1] Beygelzimer, A., Dani, V., Hayes, T., Langford, J., & Zadrozny, B. (2005, August).
         Error limiting reductions between classification tasks.
     """
-    def __init__(self, base_classifier, weight_simple_diff = False):
-        self.base_classifier=base_classifier
-        self.weight_simple_diff=weight_simple_diff
+    def __init__(self, base_classifier, weight_simple_diff = False, njobs = -1):
+        self.base_classifier = base_classifier
+        self.weight_simple_diff = weight_simple_diff
+        self.njobs = _check_njobs(njobs)
         
     def fit(self, X, C):
         """
@@ -632,46 +725,37 @@ class WeightedOneVsRest:
         C : array (n_samples, n_classes)
             The cost of predicting each label for each observation (more means worse).
         """
-        X,C = _check_fit_input(X,C)
-        self.nclasses=C.shape[1]
-        self.classifiers=[deepcopy(self.base_classifier) for i in range(self.nclasses)]
+        X, C = _check_fit_input(X, C)
+        self.nclasses = C.shape[1]
+        self.classifiers = [deepcopy(self.base_classifier) for i in range(self.nclasses)]
         if not self.weight_simple_diff:
-            C=WeightedAllPairs._calculate_v(None,C)
-        for c in range(self.nclasses):
-            cols_rest=[i for i in range(self.nclasses)]
-            del cols_rest[c]
-            cost_choice=C[:,c]
-            cost_others=C[:,cols_rest].min(axis=1)
-            w=np.abs(cost_choice-cost_others)
-            y=(cost_choice<cost_others).astype('uint8')
-            valid_cases=w>0
-            X_take=X[valid_cases,:]
-            y_take=y[valid_cases]
-            w_take=w[valid_cases]
-            w_take=_standardize_weights(w_take)
-            
-            self.classifiers[c].fit(X_take, y_take, sample_weight=w_take)
+            C = WeightedAllPairs._calculate_v(self, C)
+
+        Parallel(n_jobs=self.njobs, verbose=0, require="sharedmem")(delayed(self._fit)(c, X, C) for c in range(self.nclasses))
         return self
+
+    def _fit(self, c, X, C):
+        cols_rest = [i for i in range(self.nclasses)]
+        del cols_rest[c]
+        cost_choice = C[:, c]
+        cost_others = C[:, cols_rest].min(axis = 1)
+        w = np.abs(cost_choice - cost_others)
+        y = ( cost_choice < cost_others ).astype('uint8')
+        valid_cases = w > 0
+        X_take = X[valid_cases, :]
+        y_take = y[valid_cases]
+        w_take = w[valid_cases]
+        w_take = _standardize_weights(w_take)
+        self.classifiers[c].fit(X_take, y_take, sample_weight = w_take)
     
-    def decision_function(self, X, apply_softmax = True):
+    def decision_function(self, X):
         """
         Calculate a 'goodness' distribution over labels
-        
-        Note
-        ----
-        This will only work if the base classifiers has a 'predict_proba' method.
-        It will output the predicted probabilities of each class being the less costly
-        according to each classifier.
-        
-        If passing apply_softmax = True, it will then apply a softmax transformation so
-        that these scores sum up to 1 (per row).
         
         Parameters
         ----------
         X : array (n_samples, n_features)
             Data for which to predict the cost of each label.
-        apply_softmax : bool
-            Whether to apply a softmax transform to the 'goodness' (see Note).
         
         Returns
         -------
@@ -679,24 +763,35 @@ class WeightedOneVsRest:
             A goodness score (more is better) for each label and observation.
             If passing apply_softmax=True, these are standardized to sum up to 1 (per row).
         """
-        X=_check_predict_input(X)
-        if len(X.shape)==1:
-            X=X.reshape(1,-1)
-        preds=np.zeros((X.shape[0],self.nclasses))
-        for c in range(self.nclasses):
-            try:
-                preds[:,c]=self.classifiers[c].decision_function(X)
-            except:
-                try:
-                    preds[:,c]=self.classifiers[c].predict_proba(X)[:,1]
-                    apply_softmax=False
-                except:
-                    preds[:,c]=self.classifiers[c].predict(X)
-                    apply_softmax=False
+        X = _check_2d_inp(X)
+        preds = np.empty((X.shape[0], self.nclasses))
+
+        available_methods = dir(self.classifiers[0])
+        if "decision_function" in available_methods:
+            Parallel(n_jobs=self.njobs, verbose=0, require="sharedmem")(delayed(self._decision_function_decision_function)(c, preds, X) for c in range(self.nclasses))
+            apply_softmax = True
+        elif "predict_proba" in available_methods:
+            Parallel(n_jobs=self.njobs, verbose=0, require="sharedmem")(delayed(self._decision_function_predict_proba)(c, preds, X) for c in range(self.nclasses))
+            apply_softmax = False
+        elif "predict" in available_methods:
+            Parallel(n_jobs=self.njobs, verbose=0, require="sharedmem")(delayed(self.decision_function_predict)(c, preds, X) for c in range(self.nclasses))
+            apply_softmax = False
+        else:
+            raise ValueError("'base_classifier' must have at least one of 'decision_function', 'predict_proba', 'Predict'.")
+
         if apply_softmax:
-            preds=np.exp(preds - preds.max(axis=1).reshape(-1,1))
-            preds=preds/preds.sum(axis=1).reshape(-1,1)
+            preds = np.exp(preds - preds.max(axis=1).reshape((-1, 1)))
+            preds = preds / preds.sum(axis=1).reshape((-1, 1))
         return preds
+
+    def _decision_function_decision_function(self, c, preds, X):
+        preds[:, c] = self.classifiers[c].decision_function(X).reshape(-1)
+
+    def _decision_function_predict_proba(self, c, preds, X):
+        preds[:, c] = self.classifiers[c].predict_proba(X)[:, 1].reshape(-1)
+
+    def decision_function_predict(self, c, preds, X):
+        preds[:, c] = self.classifiers[c].predict(X).reshape(-1)
     
     def predict(self, X):
         """
@@ -712,8 +807,8 @@ class WeightedOneVsRest:
         y_hat : array (n_samples,)
             Label with expected minimum cost for each observation.
         """
-        X=_check_predict_input(X)
-        return np.argmax(self.decision_function(X,False), axis=1)
+        X = _check_2d_inp(X)
+        return np.argmax(self.decision_function(X), axis=1)
     
 class RegressionOneVsRest:
     """
@@ -728,6 +823,9 @@ class RegressionOneVsRest:
         Regressor to be used for the sub-problems. Must have:
             * A fit method of the form 'base_classifier.fit(X, y)'.
             * A predict method.
+    njobs : int
+        Number of parallel jobs to run. If it's a negative number, will take the maximum available
+        number of CPU cores.
     
     Attributes
     ----------
@@ -741,10 +839,11 @@ class RegressionOneVsRest:
     References
     ----------
     [1] Beygelzimer, A., Langford, J., & Zadrozny, B. (2008).
-        Machine learning techniques—reductions between prediction quality metrics.
+        Machine learning techniques-reductions between prediction quality metrics.
     """
-    def __init__(self, base_regressor):
-        self.base_regressor=base_regressor
+    def __init__(self, base_regressor, njobs = -1):
+        self.base_regressor = base_regressor
+        self.njobs = _check_njobs(njobs)
         
     def fit(self, X, C):
         """
@@ -757,15 +856,16 @@ class RegressionOneVsRest:
         C : array (n_samples, n_classes)
             The cost of predicting each label for each observation (more means worse).
         """
-        X,C = _check_fit_input(X,C)
-        self.nclasses=C.shape[1]
-        self.regressors=[deepcopy(self.base_regressor) for i in range(self.nclasses)]
-        for c in range(self.nclasses):
-            cost_choice=C[:,c]
-            self.regressors[c].fit(X, cost_choice)
+        X, C = _check_fit_input(X, C)
+        self.nclasses = C.shape[1]
+        self.regressors = [deepcopy(self.base_regressor) for i in range(self.nclasses)]
+        Parallel(n_jobs=self.njobs, verbose=0, require="sharedmem")(delayed(self._fit)(c, X, C) for c in range(self.nclasses))
         return self
+
+    def _fit(self, c, X, C):
+        self.regressors[c].fit(X, C[:, c])
     
-    def decision_function(self, X, apply_softmax=True):
+    def decision_function(self, X, apply_softmax = True):
         """
         Get cost estimates for each observation
         
@@ -791,18 +891,19 @@ class RegressionOneVsRest:
             Either predicted cost or a distribution of 'goodness' over the choices,
             according to the apply_softmax argument.
         """
-        X=_check_predict_input(X)
-        if len(X.shape)==1:
-            X=X.reshape(1,-1)
-        preds=np.zeros((X.shape[0],self.nclasses))
-        for c in range(self.nclasses):
-            preds[:,c]=self.regressors[c].predict(X)
+        X = _check_2d_inp(X, reshape = True)
+        preds = np.empty((X.shape[0], self.nclasses), dtype = "float64")
+        Parallel(n_jobs=self.njobs, verbose=0, require="sharedmem")(delayed(self._decision_function)(c, preds, X) for c in range(self.nclasses))
+        
         if not apply_softmax:
             return preds
         else:
-            preds=np.exp(preds - preds.max(axis=1).reshape(-1,1))
-            preds=preds/preds.sum(axis=1).reshape(-1,1)
-            return 1-preds
+            preds = np.exp(preds - preds.max(axis=1).reshape((-1, 1)))
+            preds = preds/ preds.sum(axis=1).reshape((-1, 1))
+            return 1 - preds
+
+    def _decision_function(self, c, preds, X):
+        preds[:, c] = self.regressors[c].predict(X).reshape(-1)
     
     def predict(self, X):
         """
@@ -818,37 +919,5 @@ class RegressionOneVsRest:
         y_hat : array (n_samples,)
             Label with expected minimum cost for each observation.
         """
-        X=_check_predict_input(X)
-        return np.argmin(self.decision_function(X,False), axis=1)
-    
-def _check_fit_input(X,C):
-    if type(X)==pd.core.frame.DataFrame:
-        X=X.as_matrix()
-    if type(X)==np.matrixlib.defmatrix.matrix:
-        X=np.array(X)
-    if type(X)!=np.ndarray:
-        raise ValueError("'X' must be a numpy array or pandas data frame.")
-        
-    if type(C)==pd.core.frame.DataFrame:
-        C=C.as_matrix()
-    if type(C)==np.matrixlib.defmatrix.matrix:
-        C=np.array(C)
-    if type(X)!=np.ndarray:
-        raise ValueError("'C' must be a numpy array or pandas data frame.")
-        
-    assert X.shape[0]==C.shape[0]
-    assert C.shape[1]>2
-    
-    return X,C
-    
-def _check_predict_input(X):
-    if type(X)==pd.core.frame.DataFrame:
-        X=X.as_matrix()
-    if type(X)==np.matrixlib.defmatrix.matrix:
-        X=np.array(X)
-    if type(X)!=np.ndarray:
-        raise ValueError("'X' must be a numpy array or pandas data frame.")
-    return X
-
-def _standardize_weights(w):
-    return w*w.shape[0]/w.sum()
+        X = _check_2d_inp(X)
+        return np.argmin(self.decision_function(X, False), axis=1)

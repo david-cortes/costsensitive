@@ -1,0 +1,13 @@
+Metadata-Version: 1.2
+Name: costsensitive
+Version: 0.1.2
+Summary: Reductions for Cost-Sensitive Multi-Class Classification
+Home-page: https://github.com/david-cortes/costsensitive
+Author: David Cortes
+Author-email: david.cortes.rivera@gmail.com
+License: UNKNOWN
+Description-Content-Type: UNKNOWN
+Description: UNKNOWN
+Keywords: cost sensitive multi class,cost-sensitive multi-class classification,weighted all pairs,filter tree
+Platform: UNKNOWN
+Requires-Python: >=3

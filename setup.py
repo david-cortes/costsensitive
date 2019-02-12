@@ -16,7 +16,7 @@ setup(
    'cython'
 ],
   python_requires = ">=3",
-  version = '0.1.2',
+  version = '0.1.2.1',
   description = 'Reductions for Cost-Sensitive Multi-Class Classification',
   author = 'David Cortes',
   author_email = 'david.cortes.rivera@gmail.com',
@@ -25,5 +25,5 @@ setup(
   classifiers = [],
 
   cmdclass = {'build_ext': build_ext},
-  ext_modules = [Extension("costsensitive.vwrapper", sources=["costsensitive/vwrapper.pyx"], include_dirs=[np.get_include()], extra_link_args=["-fopenmp"], extra_compile_args=["-O2","-fopenmp"])]
+  ext_modules = [Extension("costsensitive._vwrapper", sources=["costsensitive/vwrapper.pyx"], include_dirs=[np.get_include()], extra_link_args=["-fopenmp"], extra_compile_args=["-O2","-fopenmp"])]
 )

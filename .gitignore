@@ -11,6 +11,13 @@ dist/
 costsensitive.egg-info/
 	*
 
+src/
+	*.so
+	*.a
+	*.exe
+	*.lib
+	*.dynlib
+
 MANIFEST
 
 *.so
@@ -18,3 +25,5 @@ MANIFEST
 *.exe
 *.lib
 *.dynlib
+.Rproj.user
+deleteme.R

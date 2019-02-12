@@ -3,7 +3,7 @@ from copy import deepcopy
 from scipy.stats import mode
 from joblib import Parallel, delayed
 try:
-    from .vwrapper import c_calc_v
+    from ._vwrapper import c_calc_v
 except:
     pass
 

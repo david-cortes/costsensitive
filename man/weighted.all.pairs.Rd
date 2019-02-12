@@ -34,6 +34,7 @@ The objective is to create a model that would predict the
 class with the minimum cost.
 }
 \examples{
+\dontrun{
 library(costsensitive)
 wrapped.logistic <- function(X, y, weights, ...) {
 	return(glm(y ~ ., data = X, weights = weights, family = "binomial", ...))
@@ -45,6 +46,7 @@ model <- weighted.all.pairs(X, C, wrapped.logistic, predict_type_prob = "respons
 predict(model, X, type = "class")
 predict(model, X, type = "score")
 print(model)
+}
 }
 \references{
 Beygelzimer, A., Langford, J., & Zadrozny, B. (2008). Machine learning techniques-reductions between prediction quality metrics.

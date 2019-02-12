@@ -13,6 +13,7 @@
 #' @references Beygelzimer, A., Langford, J., & Zadrozny, B. (2008). Machine learning techniques-reductions between prediction quality metrics.
 #' @export
 #' @examples
+#' \dontrun{
 #' library(costsensitive)
 #' wrapped.lm <- function(X, y, ...) {
 #' 	return(lm(y ~ ., data = X, ...))
@@ -24,8 +25,9 @@
 #' predict(model, X, type = "class")
 #' predict(model, X, type = "score")
 #' print(model)
+#' }
 regression.one.vs.rest <- function(X, C, regressor, nthreads = 1, ...) {
-	out <- extract.info(C)
+	out <- extract.info(C, nthreads)
 	nclasses <- length(out[["classes"]])
 	if (out[["nthreads"]] == 1) {
 		out[["regressors"]] <- lapply(1:nclasses, function(cl) regressor(X, C[, cl], ...))
@@ -41,6 +43,7 @@ regression.one.vs.rest <- function(X, C, regressor, nthreads = 1, ...) {
 #' @param newdata New data on which to make predictions.
 #' @param type One of "class" (will output the class with minimum expected cost) or "score"
 #' (will output the predicted cost for each class, i.e. less is better).
+#' @param ... Additional arguments to pass to the predict method of the base regressor.
 #' @return When passing `type = "class"`, a vector with class numbers or names (if the cost matrix had them).
 #' When passing `type = "score"`, will output a `data.frame` with the same number of columns as `C` (passed to
 #' the `regression.one.vs.rest` function) and the predicted cost for each observation and class.

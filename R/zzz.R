@@ -1,3 +1,3 @@
 .onLoad <- function(lib, pkg) {
-   library.dynam("costsensitive", pkg, lib )
+   # library.dynam("costsensitive", pkg, lib )
 } 

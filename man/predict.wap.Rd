@@ -17,6 +17,8 @@
 
 \item{criterion}{One of "goodness" (will use the sum of probabilities output by each classifier) or "most-wins"
 (will use the predicted class by each classifier).}
+
+\item{...}{Additional arguments to pass to the predict method of the base classifier.}
 }
 \value{
 When passing `type = "class"`, a vector with class numbers or names (if the cost matrix had them).

@@ -17,6 +17,7 @@
 #' @param ... Extra arguments to pass to `classifier`.
 #' @references Beygelzimer, A., Langford, J., & Zadrozny, B. (2008). Machine learning techniques-reductions between prediction quality metrics.
 #' @examples 
+#' \dontrun{
 #' library(costsensitive)
 #' wrapped.logistic <- function(X, y, weights, ...) {
 #' 	return(glm(y ~ ., data = X, weights = weights, family = "binomial", ...))
@@ -28,8 +29,9 @@
 #' predict(model, X, type = "class")
 #' predict(model, X, type = "score")
 #' print(model)
+#' }
 weighted.all.pairs <- function(X, C, classifier, predict_type_prob = "prob", wap_weights = TRUE, nthreads = 1, ...) {
-	out <- extract.info(C)
+	out <- extract.info(C, nthreads)
 	nclasses <- length(out[["classes"]])
 	out[["ncombs"]] <- nclasses * (nclasses - 1) / 2
 	out[["predict_type_prob"]] <- predict_type_prob
@@ -112,6 +114,7 @@ convert.prob.to.winner <- function(p) {
 #' (will output the predicted score for each class, i.e. more is better).
 #' @param criterion One of "goodness" (will use the sum of probabilities output by each classifier) or "most-wins"
 #' (will use the predicted class by each classifier).
+#' @param ... Additional arguments to pass to the predict method of the base classifier.
 #' @return When passing `type = "class"`, a vector with class numbers or names (if the cost matrix had them).
 #' When passing `type = "score"`, will output a `matrix` with the same number of columns as `C` (passed to
 #' the `weighted.all.pairs` function) and the predicted score for each observation and class.

@@ -34,6 +34,7 @@ The objective is to create a model that would predict the
 class with the minimum cost.
 }
 \examples{
+\dontrun{
 library(costsensitive)
 wrapped.logistic <- function(X, y, weights, ...) {
 	return(glm(y ~ ., data = X, weights = weights, family = "binomial", ...))
@@ -45,6 +46,7 @@ model <- weighted.one.vs.rest(X, C, wrapped.logistic, predict_type_prob = "respo
 predict(model, X, type = "class")
 predict(model, X, type = "score")
 print(model)
+}
 }
 \references{
 Beygelzimer, A., Dani, V., Hayes, T., Langford, J., & Zadrozny, B. (2005, August). Error limiting reductions between classification tasks.

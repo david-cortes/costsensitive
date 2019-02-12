@@ -12,19 +12,23 @@
 #' that, unlike the Python version, this is not a shared memory model and each additional thread will
 #' require more memory from the system. Not recommended to use when the algorithm is itself parallelized.
 #' @param seed Random seed to use for the random number generation.
+#' @param ... Additional arguments to pass to `classifier`.
 #' @references Beygelzimer, A., Langford, J., & Zadrozny, B. (2008). Machine learning techniques-reductions between prediction quality metrics.
 #' @examples
+#' \dontrun{
 #' library(costsensitive)
 #' data(iris)
 #' set.seed(1)
 #' X <- iris[, c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width")]
-#' y <- as.integer(iris$Species == "setosa")
+#' y <- factor(iris$Species == "setosa", labels = c("class1", "class2"))
 #' weights <- rgamma(100, 1)
 #' classifier <- caret::train
-#' model <- cost.proportionate.classifier(X, y, weights, classifier, method = "glm", family = "binomial",
-#'    trControl=caret::trainControl(method="none"), tuneLength=1)
+#' model <- cost.proportionate.classifier(X, y, weights, classifier,
+#'   method = "glm", family = "binomial",
+#'   trControl=caret::trainControl(method="none"), tuneLength=1)
 #' predict(model, X, aggregation = "raw", type = "class")
 #' predict(model, X, aggregation = "weighted", type = "prob")
+#' }
 #' @export 
 cost.proportionate.classifier <- function(X, y, weights, classifier, nsamples=10, extra_rej_const=1e-1, nthreads=1, seed=1, ...) {
 	
@@ -76,19 +80,23 @@ cost.proportionate.classifier <- function(X, y, weights, classifier, nsamples=10
 #' be either 1-dimensional vectors with the predicted probability/score, or two-dimensional matrices with the second
 #' column having the probability/score for the positive class = in package `caret` for example, this corresponds to `type = "prob`).
 #' @param output_type One of "class" (will output the predicted class) or "score" (will output the predicted score).
+#' @param ... Additional arguments to pass to the predict method of the base classifier.
 #' @export 
 #' @examples
+#' \dontrun{
 #' library(costsensitive)
 #' data(iris)
 #' set.seed(1)
 #' X <- X <- iris[, c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width")]
-#' y <- as.integer(iris$Species == "setosa")
+#' y <- factor(iris$Species == "setosa", labels = c("class1", "class2"))
 #' weights <- rgamma(100, 1)
 #' classifier <- caret::train
-#' model <- cost.proportionate.classifier(X, y, weights, classifier, method = "glm", family = "binomial",
-#'    trControl=caret::trainControl(method="none"), tuneLength=1)
+#' model <- cost.proportionate.classifier(X, y, weights, classifier,
+#'   method = "glm", family = "binomial",
+#'   trControl=caret::trainControl(method="none"), tuneLength=1)
 #' predict(model, X, aggregation = "raw", type = "class")
 #' predict(model, X, aggregation = "weighted", type = "prob")
+#' }
 predict.costprop <- function(object, newdata, aggregation = "raw", output_type = "score", ...) {
 	
 	### check inputs

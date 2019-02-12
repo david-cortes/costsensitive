@@ -18,6 +18,7 @@
 #' @references Beygelzimer, A., Dani, V., Hayes, T., Langford, J., & Zadrozny, B. (2005, August). Error limiting reductions between classification tasks.
 #' @export
 #' @examples
+#' \dontrun{
 #' library(costsensitive)
 #' wrapped.logistic <- function(X, y, weights, ...) {
 #' 	return(glm(y ~ ., data = X, weights = weights, family = "binomial", ...))
@@ -29,8 +30,9 @@
 #' predict(model, X, type = "class")
 #' predict(model, X, type = "score")
 #' print(model)
+#' }
 weighted.one.vs.rest <- function(X, C, classifier, predict_type_prob = "prob", wap_weights = FALSE, nthreads = 1, ...) {
-	out <- extract.info(C)
+	out <- extract.info(C, nthreads)
 	nclasses <- length(out[["classes"]])
 	out[["predict_type_prob"]] <- predict_type_prob
 	out[["wap_weights"]] <- as.logical(wap_weights)
@@ -67,6 +69,7 @@ fit.single.wovr <- function(cl, X, C, classifier, ...) {
 #' @param newdata New data on which to make predictions.
 #' @param type One of "class" (will output the class with minimum expected cost) or "score"
 #' (will output the predicted score for each class, i.e. more is better).
+#' @param ... Additional arguments to pass to the predict method of the base classifier.
 #' @return When passing `type = "class"`, a vector with class numbers or names (if the cost matrix had them).
 #' When passing `type = "score"`, will output a `data.frame` with the same number of columns as `C` (passed to
 #' the `weighted.one.vs.rest` function) and the predicted score for each observation and class.

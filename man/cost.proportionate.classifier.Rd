@@ -26,23 +26,28 @@ that, unlike the Python version, this is not a shared memory model and each addi
 require more memory from the system. Not recommended to use when the algorithm is itself parallelized.}
 
 \item{seed}{Random seed to use for the random number generation.}
+
+\item{...}{Additional arguments to pass to `classifier`.}
 }
 \description{
 Fits a classifier with sample weights by reducing the problem to classification
 without sample weights through rejection sampling.
 }
 \examples{
+\dontrun{
 library(costsensitive)
 data(iris)
 set.seed(1)
 X <- iris[, c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width")]
-y <- as.integer(iris$Species == "setosa")
+y <- factor(iris$Species == "setosa", labels = c("class1", "class2"))
 weights <- rgamma(100, 1)
 classifier <- caret::train
-model <- cost.proportionate.classifier(X, y, weights, classifier, method = "glm", family = "binomial",
-   trControl=caret::trainControl(method="none"), tuneLength=1)
+model <- cost.proportionate.classifier(X, y, weights, classifier,
+  method = "glm", family = "binomial",
+  trControl=caret::trainControl(method="none"), tuneLength=1)
 predict(model, X, aggregation = "raw", type = "class")
 predict(model, X, aggregation = "weighted", type = "prob")
+}
 }
 \references{
 Beygelzimer, A., Langford, J., & Zadrozny, B. (2008). Machine learning techniques-reductions between prediction quality metrics.

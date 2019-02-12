@@ -13,6 +13,8 @@
 
 \item{type}{One of "class" (will output the class with minimum expected cost) or "score"
 (will output the predicted cost for each class, i.e. less is better).}
+
+\item{...}{Additional arguments to pass to the predict method of the base regressor.}
 }
 \value{
 When passing `type = "class"`, a vector with class numbers or names (if the cost matrix had them).

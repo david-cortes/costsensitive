@@ -20,6 +20,8 @@ be either 1-dimensional vectors with the predicted probability/score, or two-dim
 column having the probability/score for the positive class = in package `caret` for example, this corresponds to `type = "prob`).}
 
 \item{output_type}{One of "class" (will output the predicted class) or "score" (will output the predicted score).}
+
+\item{...}{Additional arguments to pass to the predict method of the base classifier.}
 }
 \description{
 Predicts either the class or score according to predictions from classifiers fit to different
@@ -28,15 +30,18 @@ that match with the arguments passed here (`type` and `criterion`). This is usua
 `type` that goes to its `predict` method.
 }
 \examples{
+\dontrun{
 library(costsensitive)
 data(iris)
 set.seed(1)
 X <- X <- iris[, c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width")]
-y <- as.integer(iris$Species == "setosa")
+y <- factor(iris$Species == "setosa", labels = c("class1", "class2"))
 weights <- rgamma(100, 1)
 classifier <- caret::train
-model <- cost.proportionate.classifier(X, y, weights, classifier, method = "glm", family = "binomial",
-   trControl=caret::trainControl(method="none"), tuneLength=1)
+model <- cost.proportionate.classifier(X, y, weights, classifier,
+  method = "glm", family = "binomial",
+  trControl=caret::trainControl(method="none"), tuneLength=1)
 predict(model, X, aggregation = "raw", type = "class")
 predict(model, X, aggregation = "weighted", type = "prob")
+}
 }

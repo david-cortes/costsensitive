@@ -1,9 +1,14 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 #include <omp.h>
 #include <math.h>
+#ifdef _FOR_R
+    #include <R_ext/Print.h>
+    #define fprintf(f, message) REprintf(message)
+#else
+    #include <stdio.h>
+#endif
 
 typedef struct indexed_double {double x; size_t ix;} indexed_double;
 

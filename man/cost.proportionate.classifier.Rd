@@ -45,7 +45,7 @@ classifier <- caret::train
 model <- cost.proportionate.classifier(X, y, weights, classifier,
   method = "glm", family = "binomial",
   trControl=caret::trainControl(method="none"), tuneLength=1)
-predict(model, X, aggregation = "raw", type = "class")
+predict(model, X, aggregation = "raw", type = "raw")
 predict(model, X, aggregation = "weighted", type = "prob")
 }
 }

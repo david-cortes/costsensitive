@@ -159,12 +159,13 @@ predict.wap <- function(object, newdata, type = "class", criterion = "most-wins"
 		if (type == "class") {
 			if (object[["nthreads"]] == 1) {
 				winners <- lapply(1:object[["ncombs"]],
-								  function(x) assign.class.most.wins(ix, object[["lst_comparisons"]], winners))
+								  function(ix) assign.class.most.wins(ix, object[["lst_comparisons"]], winners))
 			} else {
 				winners <- parallel::mclapply(1:object[["ncombs"]],
-											  function(x) assign.class.most.wins(ix, object[["lst_comparisons"]], winners),
+											  function(ix) assign.class.most.wins(ix, object[["lst_comparisons"]], winners),
 											  mc.cores = object[["nthreads"]])
 			}
+			winners <- as.data.frame(winners)
 			return(object[["classes"]][apply(winners, 1, function(x) which.max(table(x)))])
 		} else {
 			scores <- matrix(0, nrow = NROW(newdata), ncol = length(object[["classes"]]))

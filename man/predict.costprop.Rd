@@ -14,7 +14,7 @@
 
 \item{aggregation}{One of "raw" (will take the class according to votes from each classifier. The predictions from
 classifiers must in turn be 1-dimensional vectors with the predicted class, not probabilities, scores, or two-dimensional
-arrays - in package `caret` for example, this corresponds to `type = "class"`), or "weighted" (will take a weighted
+arrays - in package `caret` for example, this corresponds to `type = "raw"`), or "weighted" (will take a weighted
 vote according to the probabilities or scores predicted by each classifier. The predictions from classifiers must in turn
 be either 1-dimensional vectors with the predicted probability/score, or two-dimensional matrices with the second
 column having the probability/score for the positive class = in package `caret` for example, this corresponds to `type = "prob`).}
@@ -41,7 +41,7 @@ classifier <- caret::train
 model <- cost.proportionate.classifier(X, y, weights, classifier,
   method = "glm", family = "binomial",
   trControl=caret::trainControl(method="none"), tuneLength=1)
-predict(model, X, aggregation = "raw", type = "class")
+predict(model, X, aggregation = "raw", type = "raw")
 predict(model, X, aggregation = "weighted", type = "prob")
 }
 }

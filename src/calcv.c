@@ -5,9 +5,11 @@
 #include <omp.h>
 #include <math.h>
 
+typedef struct indexed_double {double x; size_t ix;} indexed_double;
+
 int comp_for_argsort_dbl(const void *a, const void *b)
 {
-    return (((double*)a)[0] > ((double*)b)[0])? 1 : -1;
+    return ( ((indexed_double*)a)->x > ((indexed_double*)b)->x )? 1 : -1;
 }
 
 int comp_for_argsort_szt(const void *a, const void *b)
@@ -15,15 +17,15 @@ int comp_for_argsort_szt(const void *a, const void *b)
     return (((size_t*)a)[0] > ((size_t*)b)[0])? 1 : -1;
 }
 
-void argsort_naive_dbl(double a[], size_t out[], double buffer[], size_t n)
+void argsort_naive_dbl(double a[], size_t out[], indexed_double buffer[], size_t n)
 {
     /* Note: this is a rather inefficient procedure and can be improve with e.g. C++'s sort */
     for (size_t i = 0; i < n; i++) {
-        buffer[i * 2] = a[i];
-        buffer[i * 2 + 1] = (double) i;
+        buffer[i].x = a[i];
+        buffer[i].ix = i;
     }
-    qsort(buffer, n, sizeof(double) * 2, comp_for_argsort_dbl);
-    for (size_t i = 0; i < n; i++) { out[i] = (size_t) buffer[i * 2 + 1]; }
+    qsort(buffer, n, sizeof(indexed_double), comp_for_argsort_dbl);
+    for (size_t i = 0; i < n; i++) { out[i] = buffer[i].ix; }
 }
 
 void argsort_naive_szt(size_t a[], size_t out[], size_t buffer[], size_t n)
@@ -62,7 +64,7 @@ void sort_by_ix(double a[], size_t ix[], double buffer[], size_t n)
 
 size_t *inner_order;
 size_t *out_order;
-double *buffer_argsort_dbl;
+indexed_double *buffer_argsort_dbl;
 size_t *buffer_argsort_szt;
 double *cost_buffer;
 double *rectangle_width_arr;
@@ -71,11 +73,11 @@ double *rectangle_width_arr;
 int calculate_V(double C[], double V[], size_t nrow, size_t ncol, int nthreads)
 {
     int out_of_mem = 0;
-    #pragma omp parallel shared(out_of_mem)
+    #pragma omp parallel reduction(max:out_of_mem)
     {
         inner_order = (size_t*) malloc(sizeof(size_t) * ncol);
         out_order = (size_t*) malloc(sizeof(size_t) * ncol);
-        buffer_argsort_dbl = (double*) malloc(sizeof(double) * ncol * 2);
+        buffer_argsort_dbl = (indexed_double*) malloc(sizeof(indexed_double) * ncol);
         buffer_argsort_szt = (size_t*) malloc(sizeof(size_t) * ncol * 2);
         cost_buffer = (double*) malloc(sizeof(double) * ncol);
         rectangle_width_arr = (double*) malloc(sizeof(double) * (ncol - 1));
@@ -84,12 +86,10 @@ int calculate_V(double C[], double V[], size_t nrow, size_t ncol, int nthreads)
             out_of_mem = 1;
         }
     }
-    #pragma omp barrier
-    {
-        if (out_of_mem) {
-            fprintf(stderr, "Error: Could not allocate memory for the procedure.\n");
-            goto cleanup;
-        }
+    
+    if (out_of_mem) {
+        fprintf(stderr, "Error: Could not allocate memory for the procedure.\n");
+        goto cleanup;
     }
 
     #pragma omp parallel for schedule(static) num_threads(nthreads) firstprivate(C, V, nrow, ncol)
@@ -100,7 +100,7 @@ int calculate_V(double C[], double V[], size_t nrow, size_t ncol, int nthreads)
         calc_rectangle_width(cost_buffer, rectangle_width_arr, ncol);
         V[row * ncol] = 0;
         for (size_t col = 0; col < ncol - 1; col++) { V[row * ncol + col + 1] = V[row * ncol + col] + rectangle_width_arr[col] / ((double) col + 1); }
-        sort_by_ix(V + row * ncol, out_order, buffer_argsort_dbl, ncol);
+        sort_by_ix(V + row * ncol, out_order, cost_buffer, ncol);
     }
 
     cleanup:

@@ -10,5 +10,6 @@ Description: Reduction-based techniques for cost-sensitive multi-class classific
 	Works with arbitrary classifiers taking observation weights, or with regressors. Also implements cost-proportionate rejection sampling for working with classifiers
 	that don't accept observation weights.
 Suggests: parallel
+URL: https://github.com/david-cortes/costsensitive
 License: BSD_2_clause + file LICENSE
 RoxygenNote: 6.1.1

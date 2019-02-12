@@ -1,6 +1,6 @@
 # Cost-Sensitive Multi-Class Classification
 
-This Python package contains implementations of reduction-based algorithms for cost-sensitive multi-class classification from different papers, plus some simpler heuristics for comparison purposes.
+This Python/R package contains implementations of reduction-based algorithms for cost-sensitive multi-class classification from different papers, plus some simpler heuristics for comparison purposes.
 
 ## Problem description
 
@@ -19,7 +19,7 @@ The following algorithms are implemented:
 * `WeightedAllPairs` (see "Error limiting reductions between classification tasks" and "Machine learning techniques—reductions between prediction quality metrics")
 * `RegressionOneVsRest` (see "Machine learning techniques—reductions between prediction quality metrics")
 * `WeightedOneVsRest` (a heuristic with no theoretical guarantees based on the minimum cost of the 'rest' choice)
-* `FilterTree` (see "Multiclass classification with filter trees")
+* `FilterTree` (see "Multiclass classification with filter trees")(Python only)
 
 For binary classifiers which don't support importance weighting, also an implementation of Cost-Proportionate Rejection Sampling is provided (`CostProportionateClassifier`, see "Machine learning techniques—reductions between prediction quality metrics").
 
@@ -32,11 +32,18 @@ The variants implemented here are based on multiple oracle calls (building a ser
 
 ## Installation
 
-Package is available on PyPI, can be installed with
+
+* Python:
 
 ```pip install costsensitive``` 
 
+* R:
+
+```devtools::install_github("david-cortes/costsensitive")```
+
 ## Sample usage
+
+(For the R version, see the documentation inside the package for examples)
 
 ```python 
 import numpy as np
@@ -85,9 +92,9 @@ For a more detailed example, see the IPython notebook [Cost-Sensitive Multi-Clas
 
 ## Documentation
 
-Documentation available at [http://costsensitive.readthedocs.io/en/latest/](http://costsensitive.readthedocs.io/en/latest/)
+Documentation for Python is available at [http://costsensitive.readthedocs.io/en/latest/](http://costsensitive.readthedocs.io/en/latest/). For R, it's available as part of the package.
 
-All code is internally documented through docstrings (e.g. you can try `help(WeightedAllPairs)`, `help(WeightedAllPairs.fit)`, `help(WeightedAllPairs.predict)`, etc.).
+All code is internally documented through docstrings (e.g. you can try `help(WeightedAllPairs)`, `help(WeightedAllPairs.fit)`, `help(WeightedAllPairs.predict)`, etc. - in R: `help(costsensitive::weighted.all.pairs)` and so on).
 
 ## Some comments
 

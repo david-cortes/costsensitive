@@ -87,7 +87,7 @@ predict.wovr <- function(object, newdata, type = "class", ...) {
 	if (type == "class") {
 		return(object[["classes"]][apply(pred, 1, which.max)])
 	} else {
-		names(pred) <- object[["classes"]]
+		colnames(pred) <- object[["classes"]]
 		return(pred)
 	}
 }

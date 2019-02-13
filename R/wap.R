@@ -179,7 +179,7 @@ predict.wap <- function(object, newdata, type = "class", criterion = "most-wins"
 			}
 			scores <- Reduce(function(a, b) {return(a + b)}, scores)
 			scores <- scores / length(object[["classes"]])
-			names(scores) <- object[["classes"]]
+			colnames(scores) <- object[["classes"]]
 			return(scores)
 		}
 	}

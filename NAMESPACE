@@ -1,5 +1,5 @@
 importFrom("utils", "combn", "head")
-importFrom("stats", "runif")
+importFrom("stats", "predict", "runif")
 useDynLib(costsensitive, .registration=TRUE)
 export(weighted.all.pairs)
 S3method(predict, wap)

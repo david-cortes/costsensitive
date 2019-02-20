@@ -116,6 +116,7 @@ class WeightedAllPairs:
         else:
             V = self._calculate_v(C)
 
+        V = np.asfortranarray(V)
         Parallel(n_jobs=self.njobs, verbose=0, require="sharedmem")\
             (  delayed(self._fit)(i, j, V, X) for i in range(self.nclasses - 1) for j in range(i + 1, self.nclasses) )
         self.classes_compared = np.array(self.classes_compared)
@@ -401,6 +402,7 @@ class FilterTree:
             The cost of predicting each label for each observation (more means worse).
         """
         X,C = _check_fit_input(X,C)
+        C = np.asfortranarray(C)
         nclasses=C.shape[1]
         self.tree=_BinTree(nclasses)
         self.classifiers=[deepcopy(self.base_classifier) for c in range(nclasses-1)]
@@ -729,6 +731,7 @@ class WeightedOneVsRest:
             The cost of predicting each label for each observation (more means worse).
         """
         X, C = _check_fit_input(X, C)
+        C = np.asfortranarray(C)
         self.nclasses = C.shape[1]
         self.classifiers = [deepcopy(self.base_classifier) for i in range(self.nclasses)]
         if not self.weight_simple_diff:
@@ -860,6 +863,7 @@ class RegressionOneVsRest:
             The cost of predicting each label for each observation (more means worse).
         """
         X, C = _check_fit_input(X, C)
+        C = np.asfortranarray(C)
         self.nclasses = C.shape[1]
         self.regressors = [deepcopy(self.base_regressor) for i in range(self.nclasses)]
         Parallel(n_jobs=self.njobs, verbose=0, require="sharedmem")(delayed(self._fit)(c, X, C) for c in range(self.nclasses))

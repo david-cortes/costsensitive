@@ -39,7 +39,7 @@ The variants implemented here are based on multiple oracle calls (building a ser
 
 * R:
 
-```devtools::install_github("david-cortes/costsensitive")```
+```install.packages("costsensitive")```
 
 ## Sample usage
 
@@ -92,7 +92,7 @@ For a more detailed example, see the IPython notebook [Cost-Sensitive Multi-Clas
 
 ## Documentation
 
-Documentation for Python is available at [http://costsensitive.readthedocs.io/en/latest/](http://costsensitive.readthedocs.io/en/latest/). For R, it's available as part of the package.
+Documentation for Python is available at [http://costsensitive.readthedocs.io/en/latest/](http://costsensitive.readthedocs.io/en/latest/). For R, it's available as part of the package (see [cran link](https://cran.r-project.org/web/packages/costsensitive/index.html)).
 
 All code is internally documented through docstrings (e.g. you can try `help(WeightedAllPairs)`, `help(WeightedAllPairs.fit)`, `help(WeightedAllPairs.predict)`, etc. - in R: `help(costsensitive::weighted.all.pairs)` and so on).
 

@@ -1,0 +1,2 @@
+include src/calcv.c
+include costsensitive/vwrapper.pyx

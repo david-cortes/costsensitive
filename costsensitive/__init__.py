@@ -28,7 +28,7 @@ def _check_fit_input(X, C):
     assert X.shape[0] == C.shape[0]
     assert C.shape[1] > 2
     
-    return X, C
+    return X, np.ascontiguousarray(C)
 
 def _standardize_weights(w):
     return w * w.shape[0] / w.sum()

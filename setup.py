@@ -17,7 +17,7 @@ if not from_rtd:
 			c = self.compiler.compiler_type
 			if c == 'msvc': # visual studio
 				for e in self.extensions:
-					e.extra_compile_args = ['/openmp', '/O2']
+					e.extra_compile_args = ['/O2']
 			else: # gcc and clang
 				for e in self.extensions:
 					e.extra_compile_args = ['-fopenmp', '-O2', '-march=native', '-std=c99']
@@ -34,7 +34,7 @@ if not from_rtd:
 		 'cython'
 		],
 		python_requires = ">=3",
-		version = '0.1.2.3',
+		version = '0.1.2.4',
 		description = 'Reductions for Cost-Sensitive Multi-Class Classification',
 		author = 'David Cortes',
 		author_email = 'david.cortes.rivera@gmail.com',
@@ -56,5 +56,5 @@ else:
 		 'cython'
 	],
 		python_requires = ">=3",
-		version = '0.1.2.3',
+		version = '0.1.2.4',
 		)

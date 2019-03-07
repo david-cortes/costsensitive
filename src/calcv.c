@@ -78,7 +78,13 @@ double *rectangle_width_arr;
 int calculate_V(double C[], double V[], size_t nrow, size_t ncol, int nthreads)
 {
     int out_of_mem = 0;
-    #pragma omp parallel reduction(max:out_of_mem)
+
+    /* Note: MSVC is stuck with an older version of OpenMP (17 years old at the time or writing this)
+       which does not support 'max' reductions */
+    #ifdef _OPENMP
+        #if !defined(_MSC_VER) && _OPENMP>20080101
+            #pragma omp parallel reduction(max:out_of_mem)
+    #endif
     {
         inner_order = (size_t*) malloc(sizeof(size_t) * ncol);
         out_order = (size_t*) malloc(sizeof(size_t) * ncol);

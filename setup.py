@@ -34,7 +34,7 @@ if not from_rtd:
 		 'cython'
 		],
 		python_requires = ">=3",
-		version = '0.1.2.5',
+		version = '0.1.2.6',
 		description = 'Reductions for Cost-Sensitive Multi-Class Classification',
 		author = 'David Cortes',
 		author_email = 'david.cortes.rivera@gmail.com',
@@ -56,5 +56,5 @@ else:
 		 'cython'
 	],
 		python_requires = ">=3",
-		version = '0.1.2.5',
+		version = '0.1.2.6',
 		)

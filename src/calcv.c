@@ -84,6 +84,7 @@ int calculate_V(double C[], double V[], size_t nrow, size_t ncol, int nthreads)
     #ifdef _OPENMP
         #if !defined(_MSC_VER) && _OPENMP>20080101
             #pragma omp parallel reduction(max:out_of_mem)
+        #endif
     #endif
     {
         inner_order = (size_t*) malloc(sizeof(size_t) * ncol);

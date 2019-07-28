@@ -31,6 +31,7 @@ that match with the arguments passed here (`type` and `criterion`). This is usua
 }
 \examples{
 \dontrun{
+### example here requires 'caret' package
 library(costsensitive)
 data(iris)
 set.seed(1)

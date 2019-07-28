@@ -18,10 +18,9 @@
 #' @references Beygelzimer, A., Dani, V., Hayes, T., Langford, J., & Zadrozny, B. (2005, August). Error limiting reductions between classification tasks.
 #' @export
 #' @examples
-#' \dontrun{
 #' library(costsensitive)
 #' wrapped.logistic <- function(X, y, weights, ...) {
-#' 	return(glm(y ~ ., data = X, weights = weights, family = "binomial", ...))
+#' 	return(glm(y ~ ., data = X, weights = weights, family = "quasibinomial", ...))
 #' }
 #' set.seed(1)
 #' X <- data.frame(feature1 = rnorm(100), feature2 = rnorm(100), feature3 = runif(100))
@@ -30,7 +29,7 @@
 #' predict(model, X, type = "class")
 #' predict(model, X, type = "score")
 #' print(model)
-#' }
+#' 
 weighted.one.vs.rest <- function(X, C, classifier, predict_type_prob = "prob", wap_weights = FALSE, nthreads = 1, ...) {
 	out <- extract.info(C, nthreads)
 	nclasses <- length(out[["classes"]])

@@ -13,7 +13,6 @@
 #' @references Beygelzimer, A., Langford, J., & Zadrozny, B. (2008). Machine learning techniques-reductions between prediction quality metrics.
 #' @export
 #' @examples
-#' \dontrun{
 #' library(costsensitive)
 #' wrapped.lm <- function(X, y, ...) {
 #' 	return(lm(y ~ ., data = X, ...))
@@ -25,7 +24,6 @@
 #' predict(model, X, type = "class")
 #' predict(model, X, type = "score")
 #' print(model)
-#' }
 regression.one.vs.rest <- function(X, C, regressor, nthreads = 1, ...) {
 	out <- extract.info(C, nthreads)
 	nclasses <- length(out[["classes"]])

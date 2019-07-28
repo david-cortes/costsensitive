@@ -16,6 +16,7 @@
 #' @references Beygelzimer, A., Langford, J., & Zadrozny, B. (2008). Machine learning techniques-reductions between prediction quality metrics.
 #' @examples
 #' \dontrun{
+#' ### example here requires 'caret' package
 #' library(costsensitive)
 #' data(iris)
 #' set.seed(1)
@@ -84,6 +85,7 @@ cost.proportionate.classifier <- function(X, y, weights, classifier, nsamples=10
 #' @export 
 #' @examples
 #' \dontrun{
+#' ### example here requires 'caret' package
 #' library(costsensitive)
 #' data(iris)
 #' set.seed(1)

@@ -26,7 +26,6 @@ The objective is to create a model that would predict the
 class with the minimum cost.
 }
 \examples{
-\dontrun{
 library(costsensitive)
 wrapped.lm <- function(X, y, ...) {
 	return(lm(y ~ ., data = X, ...))
@@ -38,7 +37,6 @@ model <- regression.one.vs.rest(X, C, wrapped.lm)
 predict(model, X, type = "class")
 predict(model, X, type = "score")
 print(model)
-}
 }
 \references{
 Beygelzimer, A., Langford, J., & Zadrozny, B. (2008). Machine learning techniques-reductions between prediction quality metrics.

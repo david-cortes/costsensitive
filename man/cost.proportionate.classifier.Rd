@@ -35,6 +35,7 @@ without sample weights through rejection sampling.
 }
 \examples{
 \dontrun{
+### example here requires 'caret' package
 library(costsensitive)
 data(iris)
 set.seed(1)

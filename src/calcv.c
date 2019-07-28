@@ -1,7 +1,9 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
-#include <omp.h>
+#ifdef _OPENMP
+    #include <omp.h>
+#endif
 #include <math.h>
 #ifdef _FOR_R
     #include <R_ext/Print.h>
@@ -9,6 +11,8 @@
 #else
     #include <stdio.h>
 #endif
+
+/* TODO: use qsort_s for argsorting, or switch to C++ std::sort */
 
 typedef struct indexed_double {double x; size_t ix;} indexed_double;
 

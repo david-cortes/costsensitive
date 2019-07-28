@@ -1,8 +1,8 @@
 Package: costsensitive
 Type: Package
 Title: Cost-Sensitive Multi-Class Classification
-Version: 0.1.2.1
-Date: 2019-02-14
+Version: 0.1.2.10
+Date: 2019-07-28
 Author: David Cortes
 Maintainer: David Cortes <david.cortes.rivera@gmail.com>
 Description: Reduction-based techniques for cost-sensitive multi-class classification, in which each observation has a different cost for classifying it into one class, and the goal is to predict the class with the minimum expected cost for each new observation.

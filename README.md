@@ -37,9 +37,17 @@ The variants implemented here are based on multiple oracle calls (building a ser
 
 ```pip install costsensitive``` 
 
+**Note: Python 2 is not supported and package will fail to run on Python 2.7**
+
+
 * R:
 
+From GitHub (recommended):
+```devtools::install_github("david-cortes/costsensitive")```
+
+From CRAN (not recommended):
 ```install.packages("costsensitive")```
+
 
 ## Sample usage
 

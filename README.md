@@ -42,16 +42,14 @@ The variants implemented here are based on multiple oracle calls (building a ser
 
 * R:
 
-From GitHub (recommended):
-```devtools::install_github("david-cortes/costsensitive")```
-
-From CRAN (not recommended):
-```install.packages("costsensitive")```
+```r
+install.packages("costsensitive")
+```
 
 
 ## Sample usage
 
-(For the R version, see the documentation inside the package for examples)
+(For the R version, see the documentation inside the package for examples - link to [CRAN](https://cran.r-project.org/web/packages/costsensitive/index.html))
 
 ```python 
 import numpy as np

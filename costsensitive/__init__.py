@@ -85,10 +85,10 @@ class WeightedAllPairs:
         
     References
     ----------
-    [1] Beygelzimer, A., Dani, V., Hayes, T., Langford, J., & Zadrozny, B. (2005)
-        Error limiting reductions between classification tasks.
-    [2] Beygelzimer, A., Langford, J., & Zadrozny, B. (2008).
-        Machine learning techniques-reductions between prediction quality metrics.
+    .. [1] Beygelzimer, A., Dani, V., Hayes, T., Langford, J., & Zadrozny, B. (2005)
+           Error limiting reductions between classification tasks.
+    .. [2] Beygelzimer, A., Langford, J., & Zadrozny, B. (2008).
+           Machine learning techniques-reductions between prediction quality metrics.
     """
     def __init__(self, base_classifier, weigh_by_cost_diff = True, njobs = -1):
         self.base_classifier = base_classifier
@@ -170,10 +170,10 @@ class WeightedAllPairs:
             
         References
         ----------
-        [1] Beygelzimer, A., Dani, V., Hayes, T., Langford, J., & Zadrozny, B. (2005)
-            Error limiting reductions between classification tasks.
-        [2] Beygelzimer, A., Langford, J., & Zadrozny, B. (2008).
-            Machine learning techniques-reductions between prediction quality metrics.
+        .. [1] Beygelzimer, A., Dani, V., Hayes, T., Langford, J., & Zadrozny, B. (2005)
+               Error limiting reductions between classification tasks.
+        .. [2] Beygelzimer, A., Langford, J., & Zadrozny, B. (2008).
+               Machine learning techniques-reductions between prediction quality metrics.
         """
         X = _check_2d_inp(X, reshape = True)
         if method == 'most-wins':
@@ -210,10 +210,10 @@ class WeightedAllPairs:
             
         References
         ----------
-        [1] Beygelzimer, A., Dani, V., Hayes, T., Langford, J., & Zadrozny, B. (2005)
-            Error limiting reductions between classification tasks.
-        [2] Beygelzimer, A., Langford, J., & Zadrozny, B. (2008).
-            Machine learning techniques-reductions between prediction quality metrics.
+        .. [1] Beygelzimer, A., Dani, V., Hayes, T., Langford, J., & Zadrozny, B. (2005)
+               Error limiting reductions between classification tasks.
+        .. [2] Beygelzimer, A., Langford, J., & Zadrozny, B. (2008).
+               Machine learning techniques-reductions between prediction quality metrics.
         """
         X = _check_2d_inp(X, reshape = True)
         if method == 'most-wins':
@@ -377,8 +377,8 @@ class FilterTree:
     
     References
     ----------
-    [1] Beygelzimer, A., Langford, J., & Ravikumar, P. (2007).
-        Multiclass classification with filter trees.
+    .. [1] Beygelzimer, A., Langford, J., & Ravikumar, P. (2007).
+           Multiclass classification with filter trees.
     """
     def __init__(self, base_classifier, njobs = -1):
         self.base_classifier = base_classifier
@@ -539,8 +539,8 @@ class CostProportionateClassifier:
     
     References
     ----------
-    [1] Beygelzimer, A., Langford, J., & Zadrozny, B. (2008).
-        Machine learning techniques-reductions between prediction quality metrics.
+    .. [1] Beygelzimer, A., Langford, J., & Zadrozny, B. (2008).
+           Machine learning techniques-reductions between prediction quality metrics.
     """
     def __init__(self, base_classifier, n_samples=10, extra_rej_const=1e-1, njobs = -1):
         self.base_classifier = base_classifier
@@ -711,8 +711,8 @@ class WeightedOneVsRest:
         
     References
     ----------
-    [1] Beygelzimer, A., Dani, V., Hayes, T., Langford, J., & Zadrozny, B. (2005, August).
-        Error limiting reductions between classification tasks.
+    .. [1] Beygelzimer, A., Dani, V., Hayes, T., Langford, J., & Zadrozny, B. (2005, August).
+           Error limiting reductions between classification tasks.
     """
     def __init__(self, base_classifier, weight_simple_diff = False, njobs = -1):
         self.base_classifier = base_classifier
@@ -844,8 +844,8 @@ class RegressionOneVsRest:
         
     References
     ----------
-    [1] Beygelzimer, A., Langford, J., & Zadrozny, B. (2008).
-        Machine learning techniques-reductions between prediction quality metrics.
+    .. [1] Beygelzimer, A., Langford, J., & Zadrozny, B. (2008).
+           Machine learning techniques-reductions between prediction quality metrics.
     """
     def __init__(self, base_regressor, njobs = -1):
         self.base_regressor = base_regressor

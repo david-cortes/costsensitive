@@ -15,20 +15,22 @@
 #' @param ... Additional arguments to pass to `classifier`.
 #' @references Beygelzimer, A., Langford, J., & Zadrozny, B. (2008). Machine learning techniques-reductions between prediction quality metrics.
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' ### example here requires 'caret' package
-#' library(costsensitive)
-#' data(iris)
-#' set.seed(1)
-#' X <- iris[, c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width")]
-#' y <- factor(iris$Species == "setosa", labels = c("class1", "class2"))
-#' weights <- rgamma(100, 1)
-#' classifier <- caret::train
-#' model <- cost.proportionate.classifier(X, y, weights, classifier,
-#'   method = "glm", family = "binomial",
-#'   trControl=caret::trainControl(method="none"), tuneLength=1)
-#' predict(model, X, aggregation = "raw", type = "raw")
-#' predict(model, X, aggregation = "weighted", type = "prob")
+#' if (require("caret")) {
+#'   library(costsensitive)
+#'   data(iris)
+#'   set.seed(1)
+#'   X <- iris[, c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width")]
+#'   y <- factor(iris$Species == "setosa", labels = c("class1", "class2"))
+#'   weights <- rgamma(100, 1)
+#'   classifier <- caret::train
+#'   model <- cost.proportionate.classifier(X, y, weights, classifier,
+#'     method = "glm", family = "binomial",
+#'     trControl=caret::trainControl(method="none"), tuneLength=1)
+#'   predict(model, X, aggregation = "raw", type = "raw")
+#'   predict(model, X, aggregation = "weighted", type = "prob")
+#' }
 #' }
 #' @export 
 cost.proportionate.classifier <- function(X, y, weights, classifier, nsamples=10, extra_rej_const=1e-1, nthreads=1, seed=1, ...) {

@@ -34,20 +34,22 @@ Fits a classifier with sample weights by reducing the problem to classification
 without sample weights through rejection sampling.
 }
 \examples{
-\dontrun{
+\donttest{
 ### example here requires 'caret' package
-library(costsensitive)
-data(iris)
-set.seed(1)
-X <- iris[, c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width")]
-y <- factor(iris$Species == "setosa", labels = c("class1", "class2"))
-weights <- rgamma(100, 1)
-classifier <- caret::train
-model <- cost.proportionate.classifier(X, y, weights, classifier,
-  method = "glm", family = "binomial",
-  trControl=caret::trainControl(method="none"), tuneLength=1)
-predict(model, X, aggregation = "raw", type = "raw")
-predict(model, X, aggregation = "weighted", type = "prob")
+if (require("caret")) {
+  library(costsensitive)
+  data(iris)
+  set.seed(1)
+  X <- iris[, c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width")]
+  y <- factor(iris$Species == "setosa", labels = c("class1", "class2"))
+  weights <- rgamma(100, 1)
+  classifier <- caret::train
+  model <- cost.proportionate.classifier(X, y, weights, classifier,
+    method = "glm", family = "binomial",
+    trControl=caret::trainControl(method="none"), tuneLength=1)
+  predict(model, X, aggregation = "raw", type = "raw")
+  predict(model, X, aggregation = "weighted", type = "prob")
+}
 }
 }
 \references{

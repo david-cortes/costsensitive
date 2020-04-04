@@ -1,3 +1,10 @@
 include src/calcv.c
 include costsensitive/vwrapper.pyx
 include pyproject.toml
+exclude R/*
+exclude man/*
+exclude example/*
+exclude plots/*
+exclude *.Rproj
+exclude *.Rbuildignore
+exclude *.Rhistory

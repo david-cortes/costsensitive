@@ -19,6 +19,7 @@ src/
 	*.dynlib
 
 MANIFEST
+costsensitive/vwrapper.c
 
 *.so
 *.a
@@ -26,4 +27,8 @@ MANIFEST
 *.lib
 *.dynlib
 .Rproj.user
+.Rhistory
+costsensitive.Rproj
 deleteme.R
+build/*
+

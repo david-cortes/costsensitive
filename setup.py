@@ -44,13 +44,13 @@ setup(
 	name = 'costsensitive',
 	packages = ['costsensitive'],
 	install_requires=[
-	 'numpy',
+	 'numpy>=1.17',
 	 'scipy',
 	 'joblib>=0.13',
 	 'cython'
 	],
 	python_requires = ">=3",
-	version = '0.1.2.10',
+	version = '0.1.2.11',
 	description = 'Reductions for Cost-Sensitive Multi-Class Classification',
 	author = 'David Cortes',
 	author_email = 'david.cortes.rivera@gmail.com',

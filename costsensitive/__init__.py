@@ -10,11 +10,11 @@ except:
 #### Helper functions
 def _check_2d_inp(X, reshape = False):
     if X.__class__.__name__ == "DataFrame":
-        X = X.values
+        X = X.to_numpy()
     elif type(X) == np.matrixlib.defmatrix.matrix:
         warnings.warn("Default matrix will be cast to array.")
         X = np.array(X)
-    if type(X) != np.ndarray:
+    if no isinstance(X, np.ndarray):
         raise ValueError("'X' must be a numpy array or pandas data frame.")
 
     if reshape:
@@ -31,7 +31,7 @@ def _check_fit_input(X, C):
     return X, np.ascontiguousarray(C)
 
 def _standardize_weights(w):
-    return w * w.shape[0] / w.sum()
+    return w * (w.shape[0] / w.sum())
 
 def _check_njobs(njobs):
     if njobs < 1:
@@ -525,6 +525,10 @@ class CostProportionateClassifier:
     njobs : int
         Number of parallel jobs to run. If it's a negative number, will take the maximum available
         number of CPU cores.
+    random_state : None, int, RandomState, or Generator
+        Seed or object to use for random number generation. If passing an integer,
+        will be used as seed, otherwise, if passing a numpy ``Generator`` or
+        ``RandomState``, will use it directly.
     
     Attributes
     ----------
@@ -542,11 +546,25 @@ class CostProportionateClassifier:
     .. [1] Beygelzimer, A., Langford, J., & Zadrozny, B. (2008).
            Machine learning techniques-reductions between prediction quality metrics.
     """
-    def __init__(self, base_classifier, n_samples=10, extra_rej_const=1e-1, njobs = -1):
+    def __init__(self, base_classifier, n_samples=10, extra_rej_const=1e-1,
+                 njobs = -1, random_state = None):
         self.base_classifier = base_classifier
         self.n_samples = n_samples
         self.extra_rej_const = extra_rej_const
         self.njobs = _check_njobs(njobs)
+
+        if isinstance(random_state, float):
+            random_state = int(random_state)
+        if isinstance(random_state, int):
+            self.random_state = np.random.default_rng(random_state)
+        elif random_state is None:
+            self.random_state = np.random.default_rng()
+        else:
+            if not isinstance(random_state, np.random.Generator) \
+               and not isinstance(random_state, np.random.RandomState) \
+               and (random_state != np.random):
+               raise ValueError("Received invalid 'random_state'.")
+            self.random_state = random_state
     
     def fit(self, X, y, sample_weight=None):
         """
@@ -582,9 +600,10 @@ class CostProportionateClassifier:
         Z = sample_weight.max() + self.extra_rej_const
         sample_weight = sample_weight / Z # sample weight is now acceptance prob
         self.classifiers = [deepcopy(self.base_classifier) for c in range(self.n_samples)]
-        ### Note: don't parallelize random number generation, as it's not always thread-safe
-        take_all = np.random.random(size = (self.n_samples, X.shape[0]))
-        Parallel(n_jobs=self.njobs, verbose=0, require="sharedmem")(delayed(self._fit)(c, take_all, X, y, sample_weight) for c in range(self.n_samples))
+        take_all = self.random_state.random(size = (self.n_samples, X.shape[0]))
+        Parallel(n_jobs=self.njobs, verbose=0, require="sharedmem")\
+        (delayed(self._fit)(c, take_all, X, y, sample_weight) \
+            for c in range(self.n_samples))
         return self
 
     def _fit(self, c, take_all, X, y, sample_weight):

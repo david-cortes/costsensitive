@@ -14,7 +14,7 @@ def _check_2d_inp(X, reshape = False):
     elif type(X) == np.matrixlib.defmatrix.matrix:
         warnings.warn("Default matrix will be cast to array.")
         X = np.array(X)
-    if no isinstance(X, np.ndarray):
+    if not isinstance(X, np.ndarray):
         raise ValueError("'X' must be a numpy array or pandas data frame.")
 
     if reshape:

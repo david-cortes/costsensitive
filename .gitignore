@@ -25,7 +25,8 @@ costsensitive/vwrapper.c
 *.a
 *.exe
 *.lib
-*.dynlib
+*.dylib
+*.out
 .Rproj.user
 .Rhistory
 costsensitive.Rproj

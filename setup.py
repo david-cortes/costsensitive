@@ -78,7 +78,10 @@ class build_ext_subclass( build_ext ):
 			fname = "costsensitive_compiler_testing.c"
 			with open(fname, "w") as ftest:
 				ftest.write(u"int main(int argc, char**argv) {return 0;}\n")
-			cmd = list(self.compiler.compiler)
+			try:
+				cmd = [self.compiler.compiler[0]]
+			except:
+				cmd = list(self.compiler.compiler)
 			val_good = subprocess.call(cmd + [fname])
 			try:
 				val = subprocess.call(cmd + comm + [fname])
@@ -103,7 +106,7 @@ setup(
 	 'cython'
 	],
 	python_requires = ">=3",
-	version = '0.1.2.13-1',
+	version = '0.1.2.13-2',
 	description = 'Reductions for Cost-Sensitive Multi-Class Classification',
 	author = 'David Cortes',
 	author_email = 'david.cortes.rivera@gmail.com',

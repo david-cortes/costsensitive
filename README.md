@@ -39,6 +39,21 @@ The variants implemented here are based on multiple oracle calls (building a ser
 
 **Note: Python 2 is not supported and package will fail to run on Python 2.7**
 
+** *
+**IMPORTANT:** the setup script will try to add compilation flag `-march=native`. This instructs the compiler to tune the package for the CPU in which it is being installed, but the result might not be usable in other computers. If building a binary wheel of this package or putting it into a docker image which will be used in different machines, this can be overriden by manually supplying compilation `CFLAGS` as an environment variable with something related to architecture. For maximum compatibility (but slowest speed), assuming `x86-64` computers, it's possible to do something like this:
+
+```
+export CFLAGS="-msse2"
+pip install costsensitive
+```
+
+or for creating wheels:
+```
+export CFLAGS="-msse2"
+python setup.py bwheel
+```
+** *
+
 
 * R:
 

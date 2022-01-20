@@ -22,7 +22,8 @@ class build_ext_subclass( build_ext ):
 			for e in self.extensions:
 				e.extra_compile_args = ['/O2']
 		else:
-			self.add_march_native()
+			if not self.check_cflags_contain_arch():
+				self.add_march_native()
 			self.add_openmp_linkage()
 
 			for e in self.extensions:
@@ -31,6 +32,14 @@ class build_ext_subclass( build_ext ):
 				e.extra_compile_args += ['-O2', '-std=c99']
 
 		build_ext.build_extensions(self)
+
+	def check_cflags_contain_arch(self):
+		if "CFLAGS" in os.environ:
+			arch_list = ["-march", "-mcpu", "-mtune", "-msse", "-msse2", "-msse3", "-mssse3", "-msse4", "-msse4a", "-msse4.1", "-msse4.2", "-mavx", "-mavx2"]
+			for flag in arch_list:
+				if flag in os.environ["CFLAGS"]:
+					return True
+		return False
 
 	def add_march_native(self):
 		arg_march_native = "-march=native"
@@ -106,7 +115,7 @@ setup(
 	 'cython'
 	],
 	python_requires = ">=3",
-	version = '0.1.2.13-2',
+	version = '0.1.2.13-3',
 	description = 'Reductions for Cost-Sensitive Multi-Class Classification',
 	author = 'David Cortes',
 	author_email = 'david.cortes.rivera@gmail.com',

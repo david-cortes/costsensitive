@@ -4,7 +4,7 @@ from scipy.stats import mode
 from joblib import Parallel, delayed
 try:
     from ._vwrapper import c_calc_v
-except:
+except ImportError:
     pass
 
 #### Helper functions

@@ -279,7 +279,7 @@ class WeightedAllPairs:
     def _calculate_v(self, C):
         try:
             return c_calc_v(C.astype("float64"), self.njobs)
-        except:
+        except NameError:
             V = np.empty((C.shape[0], C.shape[1]), dtype = "float64")
             Parallel(n_jobs=self.njobs, verbose=0, require="sharedmem")(delayed(WeightedAllPairs._calculate_v_single)(None, row, V, C) for row in range(C.shape[0]))
             return V

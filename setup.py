@@ -190,13 +190,13 @@ setup(
     name = 'costsensitive',
     packages = ['costsensitive'],
     install_requires=[
-     'numpy>=1.17',
+     'numpy>=1.25',
      'scipy',
      'joblib>=0.13',
      'cython'
     ],
     python_requires = ">=3",
-    version = '0.1.2.13-10',
+    version = '0.1.2.13-11',
     description = 'Reductions for Cost-Sensitive Multi-Class Classification',
     author = 'David Cortes',
     url = 'https://github.com/david-cortes/costsensitive',
@@ -204,7 +204,14 @@ setup(
     classifiers = [],
 
     cmdclass = {'build_ext': build_ext_subclass},
-    ext_modules = [Extension("costsensitive._vwrapper", sources=["costsensitive/vwrapper.pyx"], include_dirs=[np.get_include()])]
+    ext_modules = [
+        Extension(
+            "costsensitive._vwrapper",
+            sources=["costsensitive/vwrapper.pyx"],
+            include_dirs=[np.get_include()],
+            define_macros = [("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")],
+        )
+    ]
 )
 
 if not found_omp:

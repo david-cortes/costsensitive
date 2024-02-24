@@ -9,14 +9,7 @@ except ImportError:
 
 #### Helper functions
 def _check_2d_inp(X, reshape = False):
-    if X.__class__.__name__ == "DataFrame":
-        X = X.to_numpy()
-    elif type(X) == np.matrixlib.defmatrix.matrix:
-        warnings.warn("Default matrix will be cast to array.")
-        X = np.array(X)
-    if not isinstance(X, np.ndarray):
-        raise ValueError("'X' must be a numpy array or pandas data frame.")
-
+    X = np.require(X, requirements=["ENSUREARRAY"])
     if reshape:
         if len(X.shape) == 1:
             X = X.reshape((-1, 1))
@@ -27,8 +20,8 @@ def _check_fit_input(X, C):
     C = _check_2d_inp(C, reshape = False)
     assert X.shape[0] == C.shape[0]
     assert C.shape[1] > 2
-    
-    return X, np.ascontiguousarray(C)
+    C = np.require(C, dtype=np.float64, requirements=["ENSUREARRAY", "C_CONTIGUOUS"])
+    return X, C
 
 def _standardize_weights(w):
     return w * (w.shape[0] / w.sum())
@@ -116,7 +109,7 @@ class WeightedAllPairs:
         else:
             V = self._calculate_v(C)
 
-        V = np.asfortranarray(V)
+        V = np.require(V, dtype=np.float64, requirements=["ENSUREARRAY", "F_CONTIGUOUS"])
         Parallel(n_jobs=self.njobs, verbose=0, require="sharedmem")\
             (  delayed(self._fit)(i, j, V, X) for i in range(self.nclasses - 1) for j in range(i + 1, self.nclasses) )
         self.classes_compared = np.array(self.classes_compared)
@@ -278,7 +271,7 @@ class WeightedAllPairs:
 
     def _calculate_v(self, C):
         try:
-            return c_calc_v(C.astype("float64"), self.njobs)
+            return c_calc_v(np.require(C, dtype=np.float64, requirements=["ENSUREARRAY", "C_CONTIGUOUS"]), self.njobs)
         except NameError:
             V = np.empty((C.shape[0], C.shape[1]), dtype = "float64")
             Parallel(n_jobs=self.njobs, verbose=0, require="sharedmem")(delayed(WeightedAllPairs._calculate_v_single)(None, row, V, C) for row in range(C.shape[0]))
@@ -402,7 +395,7 @@ class FilterTree:
             The cost of predicting each label for each observation (more means worse).
         """
         X,C = _check_fit_input(X,C)
-        C = np.asfortranarray(C)
+        C = np.require(C, dtype=np.float64, requirements=["ENSUREARRAY", "F_CONTIGUOUS"])
         nclasses=C.shape[1]
         self.tree=_BinTree(nclasses)
         self.classifiers=[deepcopy(self.base_classifier) for c in range(nclasses-1)]
@@ -750,7 +743,7 @@ class WeightedOneVsRest:
             The cost of predicting each label for each observation (more means worse).
         """
         X, C = _check_fit_input(X, C)
-        C = np.asfortranarray(C)
+        C = np.require(C, dtype=np.float64, requirements=["ENSUREARRAY", "F_CONTIGUOUS"])
         self.nclasses = C.shape[1]
         self.classifiers = [deepcopy(self.base_classifier) for i in range(self.nclasses)]
         if not self.weight_simple_diff:
@@ -882,7 +875,7 @@ class RegressionOneVsRest:
             The cost of predicting each label for each observation (more means worse).
         """
         X, C = _check_fit_input(X, C)
-        C = np.asfortranarray(C)
+        C = np.require(C, dtype=np.float64, requirements=["ENSUREARRAY", "F_CONTIGUOUS"])
         self.nclasses = C.shape[1]
         self.regressors = [deepcopy(self.base_regressor) for i in range(self.nclasses)]
         Parallel(n_jobs=self.njobs, verbose=0, require="sharedmem")(delayed(self._fit)(c, X, C) for c in range(self.nclasses))

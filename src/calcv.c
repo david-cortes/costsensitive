@@ -108,7 +108,11 @@ int calculate_V(double C[], double V[], size_t nrow, size_t ncol, int nthreads)
         goto cleanup;
     }
 
-    #pragma omp parallel for schedule(static) num_threads(nthreads) firstprivate(C, V, nrow, ncol)
+    #ifdef _OPENMP
+        #if !defined(_MSC_VER) && _OPENMP>20080101
+            #pragma omp parallel for schedule(static) num_threads(nthreads) firstprivate(C, V, nrow, ncol)
+        #endif
+    #endif
     for (size_t row = 0; row < nrow; row++) {
         argsort_naive_dbl(C + row * ncol, inner_order, buffer_argsort_dbl, ncol);
         calc_cost(C + row * ncol, cost_buffer, inner_order, ncol);
@@ -120,7 +124,11 @@ int calculate_V(double C[], double V[], size_t nrow, size_t ncol, int nthreads)
     }
 
     cleanup:
-        #pragma omp parallel
+    #ifdef _OPENMP
+        #if !defined(_MSC_VER) && _OPENMP>20080101
+            #pragma omp parallel
+        #endif
+    #endif
         {
             free(inner_order);
             free(buffer_argsort_dbl);

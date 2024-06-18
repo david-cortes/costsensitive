@@ -196,7 +196,7 @@ setup(
      'cython'
     ],
     python_requires = ">=3",
-    version = '0.1.2.13-12',
+    version = '0.1.2.13-13',
     description = 'Reductions for Cost-Sensitive Multi-Class Classification',
     author = 'David Cortes',
     url = 'https://github.com/david-cortes/costsensitive',
@@ -209,7 +209,6 @@ setup(
             "costsensitive._vwrapper",
             sources=["costsensitive/vwrapper.pyx"],
             include_dirs=[np.get_include()],
-            define_macros = [("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")],
         )
     ]
 )

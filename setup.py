@@ -8,6 +8,7 @@ import numpy as np
 import os, sys, warnings
 import subprocess
 from sys import platform
+import tempfile
 
 found_omp = True
 def set_omp_false():
@@ -160,7 +161,7 @@ class build_ext_subclass( build_ext ):
             if not isinstance(comm, list):
                 comm = [comm]
             print("--- Checking compiler support for option '%s'" % " ".join(comm))
-            fname = "costsensitive_compiler_testing.c"
+            fname = os.path.join(tempfile.gettempdir(), "costsensitive_compiler_testing.c")
             with open(fname, "w") as ftest:
                 ftest.write(u"int main(int argc, char**argv) {return 0;}\n")
             try:
@@ -196,7 +197,7 @@ setup(
      'cython'
     ],
     python_requires = ">=3",
-    version = '0.1.2.13-13',
+    version = '0.1.2.13-14',
     description = 'Reductions for Cost-Sensitive Multi-Class Classification',
     author = 'David Cortes',
     url = 'https://github.com/david-cortes/costsensitive',

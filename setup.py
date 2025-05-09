@@ -197,7 +197,7 @@ setup(
      'cython'
     ],
     python_requires = ">=3",
-    version = '0.1.2.13-14',
+    version = '0.1.2.13-15',
     description = 'Reductions for Cost-Sensitive Multi-Class Classification',
     author = 'David Cortes',
     url = 'https://github.com/david-cortes/costsensitive',
